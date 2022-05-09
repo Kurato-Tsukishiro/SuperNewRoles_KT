@@ -1547,13 +1547,56 @@ namespace SuperNewRoles.Roles
         public static class Tracker
         {
             public static List<PlayerControl> TrackerPlayer;
-            public static Color32 color = new Color32(0, 255, 0, byte.MaxValue);
+            public static Color32 color = new Color32(100, 58, 220, byte.MaxValue);
+            public static List<Arrow> localArrows = new List<Arrow>();
+
+            public static float UpdateIntervall = 5f;
+            public static bool ResetTargetAfterMeeting = false;
+            public static bool CanTrackCorpses = false;
+            public static float CorpsesTrackingCooldown = 30f;
+            public static float CorpsesTrackingDuration = 5f;
+            public static float CorpsesTrackingTimer = 0f;
+            public static List<Vector3> deadBodyPositions = new List<Vector3>();
+
+            public static PlayerControl CurrentTarget;
+            public static PlayerControl Tracked;
+            public static bool UsedTracker = false;
+            public static float TimeUntilUpdate = 0f;
+            public static Arrow arrow = new Arrow(Color.blue);
+
+            private static Sprite TrackCorpsesButtonSprite;
+            public static Sprite getTrackCorpsesButtonSprite()
+            {
+                if (TrackCorpsesButtonSprite) return TrackCorpsesButtonSprite;
+                TrackCorpsesButtonSprite = ModHelpers.loadSpriteFromResources("SuperNewRoles.Resources.PathfindButton.png", 115f);
+                return TrackCorpsesButtonSprite;
+            }
+            
+            private static Sprite buttonSprite;
+            public static Sprite getButtonSprite()
+            {
+                if (buttonSprite) return buttonSprite;
+                buttonSprite = ModHelpers.loadSpriteFromResources("SuperNewRoles.Resources.TrackerButton.png", 115f);
+                return buttonSprite;
+            }
+
+            public static void resetTracked()
+            {
+                CurrentTarget = Tracked = null;
+                UsedTracker = false;
+                if (arrow?.arrow != null) UnityEngine.Object.Destroy(arrow.arrow);
+                arrow = new Arrow(Color.blue);
+                if (arrow.arrow != null) arrow.arrow.SetActive(false);
+            }
+
             public static void ClearAndReload()
             {
                 TrackerPlayer = new List<PlayerControl>();
+
             }
+
         }
-        //新ロールクラス
+        
         public static class Quarreled
         {
             public static List<List<PlayerControl>> QuarreledPlayer;
