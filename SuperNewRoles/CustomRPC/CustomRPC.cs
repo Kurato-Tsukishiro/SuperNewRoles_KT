@@ -147,7 +147,8 @@ namespace SuperNewRoles.CustomRPC
         UseStuntmanCount,
         UseMadStuntmanCount,
         CustomEndGame,
-        UncheckedProtect
+        UncheckedProtect,
+        TrackerUsedTracker
     }
     public static class RPCProcedure
     {
@@ -666,6 +667,13 @@ namespace SuperNewRoles.CustomRPC
             {
             }
         }
+        public static void TrackerUsedTracker(byte targetId)
+        {
+            RoleClass.Tracker.UsedTracker = true;
+            foreach (PlayerControl player in PlayerControl.AllPlayerControls)
+                if (player.PlayerId == targetId)
+                    RoleClass.Tracker.Tracked = player;
+        }
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
         class RPCHandlerPatch
         {
@@ -836,6 +844,9 @@ namespace SuperNewRoles.CustomRPC
                         break;
                     case (byte)CustomRPC.UncheckedProtect:
                         UncheckedProtect(reader.ReadByte(),reader.ReadByte(),reader.ReadByte());
+                        break;
+                    case (byte)CustomRPC.TrackerUsedTracker:
+                        RPCProcedure.TrackerUsedTracker(reader.ReadByte());
                         break;
                 }
             }

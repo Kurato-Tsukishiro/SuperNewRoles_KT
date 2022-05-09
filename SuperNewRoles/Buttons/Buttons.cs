@@ -43,6 +43,8 @@ namespace SuperNewRoles.Buttons
         public static CustomButton ImpostorSidekickButton;
         public static CustomButton SideKillerSidekickButton;
         public static CustomButton FalseChargesFalseChargeButton;
+        public static CustomButton TrackerTrackPlayerButton;
+        public static CustomButton TrackerTrackCorpsesButton;
 
         public static TMPro.TMP_Text sheriffNumShotsText;
 
@@ -775,6 +777,64 @@ namespace SuperNewRoles.Buttons
 
             SideKillerSidekickButton.buttonText = ModTranslation.getString("SidekickName");
             SideKillerSidekickButton.showButtonText = true;
+
+            // Tracker button
+            foreach (PlayerControl TrackerPlayer in RoleClass.Tracker.TrackerPlayer)
+            {
+                TrackerTrackPlayerButton = new CustomButton(
+
+                () =>
+                {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.TrackerUsedTracker, Hazel.SendOption.Reliable, -1);
+                    writer.Write(RoleClass.Tracker.CurrentTarget.PlayerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.TrackerUsedTracker(RoleClass.Tracker.CurrentTarget.PlayerId);
+                },
+                () => { return RoleClass.Tracker.TrackerPlayer != null && TrackerPlayer == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
+                () => { return PlayerControl.LocalPlayer.CanMove && RoleClass.Tracker.CurrentTarget != null && !RoleClass.Tracker.UsedTracker; },
+                () => { if (RoleClass.Tracker.ResetTargetAfterMeeting) RoleClass.Tracker.resetTracked(); },
+                RoleClass.Tracker.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+                );
+            }
+
+            TrackerTrackPlayerButton.buttonText = ModTranslation.getString("TrackerButtonName");
+            TrackerTrackPlayerButton.showButtonText = true;
+
+            foreach (PlayerControl TrackerPlayer in RoleClass.Tracker.TrackerPlayer)
+            {
+                TrackerTrackCorpsesButton = new CustomButton(
+                () => { RoleClass.Tracker.CorpsesTrackingTimer = RoleClass.Tracker.CorpsesTrackingDuration; },
+                () => { return RoleClass.Tracker.TrackerPlayer != null && TrackerPlayer == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead && RoleClass.Tracker.CanTrackCorpses; },
+                () => { return PlayerControl.LocalPlayer.CanMove; },
+                () =>
+                {
+                    TrackerTrackCorpsesButton.Timer = TrackerTrackCorpsesButton.MaxTimer;
+                    TrackerTrackCorpsesButton.isEffectActive = false;
+                    TrackerTrackCorpsesButton.actionButton.cooldownTimerText.color = Palette.EnabledColor;
+                },
+                RoleClass.Tracker.getTrackCorpsesButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.Q,
+                49,
+                true,
+                RoleClass.Tracker.CorpsesTrackingDuration,
+                () =>
+                {
+                    TrackerTrackCorpsesButton.Timer = TrackerTrackCorpsesButton.MaxTimer;
+                }
+            );
+
+            }
+
+            TrackerTrackPlayerButton.buttonText = ModTranslation.getString("PathfindButtonName");
+            TrackerTrackPlayerButton.showButtonText = true;
 
             RoleClass.SerialKiller.SuicideKillText = GameObject.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.KillButton.cooldownTimerText.transform.parent);
             RoleClass.SerialKiller.SuicideKillText.text = "";
