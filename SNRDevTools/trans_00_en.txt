@@ -553,3 +553,12 @@ Let's monitor everything.
 Vampire
 Let's do a delayed kill.
 Kill Delay
+Tracker
+Contribute to the crew camp with transmitters and corpse exploration capabilitie.
+Update Interval
+Reset Target After Meeting
+Tracker Can Track Corpses
+Corpses Tracking Cooldown
+Corpses Tracking Duration
+Track!
+Find!

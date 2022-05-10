@@ -822,13 +822,14 @@ namespace SuperNewRoles.Buttons
                 __instance,
                 __instance.AbilityButton,
                 KeyCode.Q,
-                49,
-                true,
-                RoleClass.Tracker.CorpsesTrackingDuration,
-                () =>
-                {
-                    TrackerTrackCorpsesButton.Timer = TrackerTrackCorpsesButton.MaxTimer;
-                }
+                49
+
+                //true,
+                //RoleClass.Tracker.CorpsesTrackingDuration,
+                //() =>
+                //{
+                //    TrackerTrackCorpsesButton.Timer = TrackerTrackCorpsesButton.MaxTimer;
+                //}
             );
 
             }

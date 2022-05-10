@@ -554,3 +554,12 @@ ObserverTitle1,Let's monitor everything.,すべてを監視しよう
 VampireName,Vampire,ヴァンパイア
 VampireTitle1,Let's do a delayed kill.,遅延キルしよう
 VampireKillDelay,Kill Delay,キル遅延
+TrackerName,Tracker,トラッカー
+TrackerTitle1,Contribute to the crew camp with transmitters and corpse exploration capabilitie.,発信機と死体探査能力を駆使してクルー陣営に貢献しよう
+TrackerUpdateIntervall,Update Interval,発信機更新間隔
+TrackerResetTargetAfterMeeting,Reset Target After Meeting,会議後、発信機を付けた対象がリセットされる
+TrackerCanTrackCorpses,Tracker Can Track Corpses,死体を探査できる
+TrackerCorpsesTrackingCooldown,Corpses Tracking Cooldown,死体探査能力のクールタイム
+TrackerCorpsesTrackingDuration,Corpses Tracking Duration,死体探査能力の持続時間
+TrackerButtonName,Track!,発信機を取り付ける!
+PathfindButtonName,Find!,死体を探す!

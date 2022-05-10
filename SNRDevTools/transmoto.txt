@@ -553,3 +553,12 @@ ObserverTitle1
 VampireName
 VampireTitle1
 VampireKillDelay
+TrackerName
+TrackerTitle1
+TrackerUpdateIntervall
+TrackerResetTargetAfterMeeting
+TrackerCanTrackCorpses
+TrackerCorpsesTrackingCooldown
+TrackerCorpsesTrackingDuration
+TrackerButtonName
+PathfindButtonName
