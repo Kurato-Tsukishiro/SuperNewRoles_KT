@@ -792,7 +792,7 @@ namespace SuperNewRoles.Buttons
                 },
                 () => { return RoleClass.Tracker.TrackerPlayer != null && TrackerPlayer == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
                 () => { return PlayerControl.LocalPlayer.CanMove && RoleClass.Tracker.CurrentTarget != null && !RoleClass.Tracker.UsedTracker; },
-                () => { if (RoleClass.Tracker.ResetTargetAfterMeeting) RoleClass.Tracker.resetTracked(); },
+                () => { if (RoleClass.Tracker.ResetTargetAfterMeeting) RoleClass.Tracker.ResetTracked(); },
                 RoleClass.Tracker.getButtonSprite(),
                 new Vector3(-1.8f, -0.06f, 0),
                 __instance,

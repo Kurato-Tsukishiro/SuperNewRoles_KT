@@ -878,12 +878,12 @@ namespace SuperNewRoles.CustomOption
             SeerSoulDuration = CustomOption.Create(368, true, CustomOptionType.Crewmate, "SeerSoulDuration", 15f, 0f, 120f, 5f, SeerLimitSoulDuration, format: "unitCouples");
 
             TrackerOption = new CustomRoleOption(900, false, CustomOptionType.Crewmate, "TrackerName", RoleClass.Tracker.color, 1);
-            TrackerPlayerCount = CustomOption.Create(351, true, CustomOptionType.Crewmate, "SettingPlayerCountName", CrewPlayers[0], CrewPlayers[1], CrewPlayers[2], CrewPlayers[3], NocturnalityOption);
-            TrackerUpdateIntervall = CustomOption.Create(90, false, CustomOptionType.Crewmate, "TrackerUpdateIntervall", 5f, 1f, 30f, 1f, TrackerOption);
-            TrackerResetTargetAfterMeeting = CustomOption.Create(902, false, CustomOptionType.Crewmate, "TrackerResetTargetAfterMeeting", false, TrackerOption);
-            TrackerCanTrackCorpses = CustomOption.Create(903, false, CustomOptionType.Crewmate, "TrackerCanTrackCorpses", true, TrackerOption);
-            TrackerCorpsesTrackingCooldown = CustomOption.Create(904, false, CustomOptionType.Crewmate, "TrackerCorpsesTrackingCooldown", 30f, 5f, 120f, 5f, TrackerCanTrackCorpses);
-            TrackerCorpsesTrackingDuration = CustomOption.Create(905, false, CustomOptionType.Crewmate, "TrackerCorpsesTrackingDuration", 5f, 2.5f, 30f, 2.5f, TrackerCanTrackCorpses);
+            TrackerPlayerCount = CustomOption.Create(901, true, CustomOptionType.Crewmate, "SettingPlayerCountName", CrewPlayers[0], CrewPlayers[1], CrewPlayers[2], CrewPlayers[3], TrackerOption);
+            TrackerUpdateIntervall = CustomOption.Create(902, false, CustomOptionType.Crewmate, "TrackerUpdateIntervall", 5f, 1f, 30f, 1f, TrackerOption);
+            TrackerResetTargetAfterMeeting = CustomOption.Create(903, false, CustomOptionType.Crewmate, "TrackerResetTargetAfterMeeting", false, TrackerOption);
+            TrackerCanTrackCorpses = CustomOption.Create(904, false, CustomOptionType.Crewmate, "TrackerCanTrackCorpses", true, TrackerOption);
+            TrackerCorpsesTrackingCooldown = CustomOption.Create(905, false, CustomOptionType.Crewmate, "TrackerCorpsesTrackingCooldown", 30f, 5f, 120f, 5f, TrackerCanTrackCorpses);
+            TrackerCorpsesTrackingDuration = CustomOption.Create(906, false, CustomOptionType.Crewmate, "TrackerCorpsesTrackingDuration", 5f, 2.5f, 30f, 2.5f, TrackerCanTrackCorpses);
 
             QuarreledOption = CustomOption.Create(122, false, CustomOptionType.Neutral, cs(RoleClass.Quarreled.color, "QuarreledName"), false, null, isHeader: true);
             QuarreledTeamCount = CustomOption.Create(124, false, CustomOptionType.Neutral, "QuarreledTeamCountSetting", QuarreledPlayers[0], QuarreledPlayers[1], QuarreledPlayers[2], QuarreledPlayers[3], QuarreledOption);

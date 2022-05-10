@@ -1616,7 +1616,7 @@ namespace SuperNewRoles.Roles
                 return buttonSprite;
             }
 
-            public static void resetTracked()
+            public static void ResetTracked()
             {
                 CurrentTarget = Tracked = null;
                 UsedTracker = false;
