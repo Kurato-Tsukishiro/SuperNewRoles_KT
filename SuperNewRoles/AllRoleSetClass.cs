@@ -798,8 +798,12 @@ namespace SuperNewRoles
                     return CustomOption.CustomOptions.NocturnalityPlayerCount.getFloat();
                 case (RoleId.Observer):
                     return CustomOption.CustomOptions.ObserverPlayerCount.getFloat();
-                    case (RoleId.Vampire):
+                case (RoleId.Vampire):
                     return CustomOption.CustomOptions.VampirePlayerCount.getFloat();
+                case (RoleId.DarkKiller):
+                    return CustomOption.CustomOptions.DarkKillerPlayerCount.getFloat();
+                case (RoleId.Seer):
+                    return CustomOption.CustomOptions.SeerPlayerCount.getFloat();
                     case (RoleId.Tracker):
                     return CustomOption.CustomOptions.TrackerPlayerCount.getFloat();
                     //プレイヤーカウント
@@ -837,6 +841,22 @@ namespace SuperNewRoles
             {
                 int OptionDate = int.Parse(CustomOption.CustomOptions.SoothSayerOption.getString().Replace("0%", ""));
                 RoleId ThisRoleId = RoleId.SoothSayer;
+                if (OptionDate == 10)
+                {
+                    Crewonepar.Add(ThisRoleId);
+                }
+                else
+                {
+                    for (int i = 1; i <= OptionDate; i++)
+                    {
+                        Crewnotonepar.Add(ThisRoleId);
+                    }
+                }
+            }
+            if (!(CustomOption.CustomOptions.JesterOption.getString().Replace("0%", "") == ""))
+            {
+                int OptionDate = int.Parse(CustomOption.CustomOptions.JesterOption.getString().Replace("0%", ""));
+                RoleId ThisRoleId = RoleId.Jester;
                 if (OptionDate == 10)
                 {
                     Crewonepar.Add(ThisRoleId);
@@ -2031,19 +2051,19 @@ namespace SuperNewRoles
                     }
                 }
             }
-        if (!(CustomOption.CustomOptions.TrackerOption.getString().Replace("0%", "") == ""))
+        if (!(CustomOption.CustomOptions.DarkKillerOption.getString().Replace("0%", "") == ""))
             {
-                int OptionDate = int.Parse(CustomOption.CustomOptions.TrackerOption.getString().Replace("0%", ""));
-                RoleId ThisRoleId = RoleId.Tracker;
+                int OptionDate = int.Parse(CustomOption.CustomOptions.DarkKillerOption.getString().Replace("0%", ""));
+                RoleId ThisRoleId = RoleId.DarkKiller;
                 if (OptionDate == 10)
                 {
-                    Crewonepar.Add(ThisRoleId);
+                    Impoonepar.Add(ThisRoleId);
                 }
                 else
                 {
                     for (int i = 1; i <= OptionDate; i++)
                     {
-                        Crewnotonepar.Add(ThisRoleId);
+                        Imponotonepar.Add(ThisRoleId);
                     }
                 }
             }
