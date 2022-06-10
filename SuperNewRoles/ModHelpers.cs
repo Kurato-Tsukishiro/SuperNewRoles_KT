@@ -246,6 +246,15 @@ namespace SuperNewRoles
                     }
                 }
             }
+            if (target.isRole(RoleId.Shielder) && !killer.isRole(RoleId.OverKiller) && RoleClass.Shielder.IsShield[target.PlayerId])
+            {
+                MessageWriter writer = RPCHelper.StartRPC(CustomRPC.CustomRPC.ShielderProtect);
+                writer.Write(target.PlayerId);
+                writer.Write(target.PlayerId);
+                writer.Write(0);
+                writer.EndRPC();
+                RPCProcedure.ShielderProtect(target.PlayerId, target.PlayerId, 0);
+            }
             if (target.isRole(RoleId.Fox) && !killer.isRole(RoleId.OverKiller) && (!RoleClass.Fox.KillGuard.ContainsKey(target.PlayerId) || RoleClass.Fox.KillGuard[target.PlayerId] >= 1))
             {
                 if (EvilEraser.IsOKAndTryUse(EvilEraser.BlockTypes.FoxGuard, killer))
@@ -397,7 +406,7 @@ namespace SuperNewRoles
             else if (source.PlayerId == target.PlayerId) return false; // Player sees his own name
             else if (source.isImpostor() && target.isImpostor()) return false;
             else if ((target.isRole(RoleId.NiceScientist) || target.isRole(RoleId.EvilScientist))  && GameData.Instance && RoleClass.NiceScientist.IsScientistPlayers[target.PlayerId]) return true;
-            return true;
+            return false;
         }
         public static Sprite loadSpriteFromResources(string path, float pixelsPerUnit)
         {
@@ -515,6 +524,17 @@ namespace SuperNewRoles
                     return true;
                 }
             }
+            return false;
+        }
+        public static bool IsPosition(Vector3 pos,Vector2 pos2)
+        {
+            if (pos.x == pos2.x && pos.y == pos2.y) return true;
+            return false;
+        }
+        public static bool IsPositionDistance(Vector2 pos, Vector2 pos2,float distance)
+        {
+            float dis = Vector2.Distance(pos,pos2);
+            if (dis <= distance) return true;
             return false;
         }
     }

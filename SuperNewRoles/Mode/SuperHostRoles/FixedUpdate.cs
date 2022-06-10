@@ -16,12 +16,18 @@ namespace SuperNewRoles.Mode.SuperHostRoles
         public static Dictionary<int, string> DefaultName = new Dictionary<int, string>();
         private static int UpdateDate = 0;
 
-        [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerJoined))]
-        public class AmongUsClientOnPlayerJoinedPatch
+        [HarmonyPatch(typeof(HudManager), nameof(HudManager.CoShowIntro))]
+        class CoShowIntroPatch
         {
-            public static void Postfix()
+            public static void Prefix(HudManager __instance)
             {
                 DefaultName = new Dictionary<int, string>();
+                foreach (var pc in PlayerControl.AllPlayerControls)
+                {
+                    //SuperNewRolesPlugin.Logger.LogInfo($"{pc.PlayerId}:{pc.name}:{pc.nameText.text}");
+                    DefaultName[pc.PlayerId] = pc.name;
+                    pc.nameText.text = pc.name;
+                }
             }
         }
         public static string getDefaultName(this PlayerControl player)
@@ -57,6 +63,12 @@ namespace SuperNewRoles.Mode.SuperHostRoles
         private static int a = 0;
         public static void SetRoleName(PlayerControl player, bool IsUnchecked = false)
         {
+
+            var caller = new System.Diagnostics.StackFrame(1, false);
+            var callerMethod = caller.GetMethod();
+            string callerMethodName = callerMethod.Name;
+            string callerClassName = callerMethod.DeclaringType.FullName;
+            SuperNewRolesPlugin.Logger.LogInfo(player.name + "への(IsCommsなしの)SetRoleNameが" + callerClassName + "." + callerMethodName + "から呼び出されました。");
             SetRoleName(player, RoleHelpers.IsComms() , IsUnchecked);
         }
 
@@ -65,7 +77,15 @@ namespace SuperNewRoles.Mode.SuperHostRoles
 
         public static void SetRoleName(PlayerControl player, bool commsActive, bool IsUnchecked = false)
         {
+            if (!ModeHandler.isMode(ModeId.SuperHostRoles)) return;
             if (player.Data.Disconnected || player.IsBot() || !AmongUsClient.Instance.AmHost) return;
+
+            var caller = new System.Diagnostics.StackFrame(1, false);
+            var callerMethod = caller.GetMethod();
+            string callerMethodName = callerMethod.Name;
+            string callerClassName = callerMethod.DeclaringType.FullName;
+            SuperNewRolesPlugin.Logger.LogInfo(player.name+"へのSetRoleNameが" + callerClassName + "." + callerMethodName + "から呼び出されました。");
+
             //if (UpdateTime.ContainsKey(player.PlayerId) && UpdateTime[player.PlayerId] > 0) return;
 
             //UpdateTime[player.PlayerId] = UpdateDefaultTime;
@@ -91,6 +111,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
 
             foreach (PlayerControl CelebrityPlayer in RoleClass.Celebrity.CelebrityPlayer)
             {
+                if (CelebrityPlayer == player) continue;
                 ChangePlayers.Add(CelebrityPlayer.PlayerId, ModHelpers.cs(RoleClass.Celebrity.color, CelebrityPlayer.getDefaultName()));
             }
 
@@ -107,7 +128,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     }
                 }
             }
-            else if (MadMayor.CheckImpostor(player))
+            else if (MadMayor.CheckImpostor(player) || player.isRole(RoleId.Marine))
             {
                 foreach (PlayerControl Impostor in PlayerControl.AllPlayerControls)
                 {
@@ -171,7 +192,24 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     }
                 }
             }
-            
+            else if (player.isRole(RoleId.Arsonist))
+            {
+                foreach (PlayerControl DousePlayer in Arsonist.GetIconPlayers(player))
+                {
+                    if (DousePlayer.IsPlayer())
+                    {
+                        if (!ChangePlayers.ContainsKey(DousePlayer.PlayerId))
+                        {
+                            ChangePlayers.Add(DousePlayer.PlayerId, DousePlayer.getDefaultName() + ModHelpers.cs(RoleClass.Arsonist.color, " §"));
+                        }
+                        else
+                        {
+                            ChangePlayers[DousePlayer.PlayerId] = ChangePlayers[DousePlayer.PlayerId] + ModHelpers.cs(RoleClass.Arsonist.color, " §");
+                        }
+                    }
+                }
+            }
+
             if (player.IsLovers())
             {
                 var suffix = ModHelpers.cs(RoleClass.Lovers.color, " ♥");
@@ -240,35 +278,52 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                 }
             }
             bool IsDemonVIew = false;
+            bool IsArsonistVIew = false;
             if ((player.isDead() || player.isRole(RoleId.God)) && !IsUnchecked)
             {
                 if (Demon.IsViewIcon(player))
                 {
-                    MySuffix = ModHelpers.cs(RoleClass.Demon.color, " ▲");
+                    MySuffix += ModHelpers.cs(RoleClass.Demon.color, " ▲");
                     IsDemonVIew = true;
+                }
+                if (Arsonist.IsViewIcon(player))
+                {
+                    MySuffix += ModHelpers.cs(RoleClass.Arsonist.color, " §");
+                    IsArsonistVIew = true;
                 }
                 NewName = "(<size=75%>" + ModHelpers.cs(introdate.color, introdate.Name) + TaskText + "</size>)" + ModHelpers.cs(introdate.color, Name + MySuffix);
             }
             else if (player.isAlive() || IsUnchecked)
             {
-                if ((player.isDead() || player.isRole(RoleId.God)) && Demon.IsViewIcon(player))
+                if ((player.isDead() || player.isRole(RoleId.God)))
                 {
-                    MySuffix = ModHelpers.cs(RoleClass.Demon.color, " ▲");
-                    IsDemonVIew = true;
+                    if (Demon.IsViewIcon(player))
+                    {
+                        MySuffix += ModHelpers.cs(RoleClass.Demon.color, " ▲");
+                        IsDemonVIew = true;
+                    }
+                    if (Arsonist.IsViewIcon(player))
+                    {
+                        MySuffix += ModHelpers.cs(RoleClass.Arsonist.color, " §");
+                        IsArsonistVIew = true;
+                    }
                 }
-
                 NewName = "<size=75%>" + ModHelpers.cs(introdate.color, introdate.Name) + TaskText + "</size>\n" + ModHelpers.cs(introdate.color, Name + MySuffix);
+                SuperNewRolesPlugin.Logger.LogInfo(NewName);
             }
             if (!player.IsMod())
             {
                 player.RpcSetNamePrivate(NewName);
-                foreach (var ChangePlayerData in ChangePlayers)
+                if (player.isAlive())
                 {
-                    PlayerControl ChangePlayer = ModHelpers.playerById(ChangePlayerData.Key);
-                    if (ChangePlayer != null)
+                    foreach (var ChangePlayerData in ChangePlayers)
                     {
-                        ChangePlayer.RpcSetNamePrivate(ChangePlayerData.Value, player);
-                        SuperNewRolesPlugin.Logger.LogInfo(ChangePlayerData.Value);
+                        PlayerControl ChangePlayer = ModHelpers.playerById(ChangePlayerData.Key);
+                        if (ChangePlayer != null)
+                        {
+                            ChangePlayer.RpcSetNamePrivate(ChangePlayerData.Value, player);
+                            SuperNewRolesPlugin.Logger.LogInfo(ChangePlayerData.Value);
+                        }
                     }
                 }
             }
@@ -276,6 +331,10 @@ namespace SuperNewRoles.Mode.SuperHostRoles
             if (!IsDemonVIew && Demon.IsViewIcon(player))
             {
                 DieSuffix += ModHelpers.cs(RoleClass.Demon.color, " ▲");
+            }
+            if (!IsArsonistVIew && Arsonist.IsViewIcon(player))
+            {
+                DieSuffix += ModHelpers.cs(RoleClass.Arsonist.color, " §");
             }
             NewName += DieSuffix;
             foreach (PlayerControl DiePlayer in DiePlayers)
@@ -289,6 +348,12 @@ namespace SuperNewRoles.Mode.SuperHostRoles
 
         public static void SetRoleNames(bool IsUnchecked = false)
         {
+            var caller = new System.Diagnostics.StackFrame(1, false);
+            var callerMethod = caller.GetMethod();
+            string callerMethodName = callerMethod.Name;
+            string callerClassName = callerMethod.DeclaringType.FullName;
+            SuperNewRolesPlugin.Logger.LogInfo("SetRoleNamesが" + callerClassName + "." + callerMethodName + "から呼び出されました。");
+
             bool commsActive = RoleHelpers.IsComms();
             foreach (PlayerControl p in PlayerControl.AllPlayerControls)
             {
@@ -320,7 +385,8 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                 PlayerControl.LocalPlayer.isRole(RoleId.MadMaker) ||
                 PlayerControl.LocalPlayer.isRole(RoleId.Egoist) ||
                 PlayerControl.LocalPlayer.isRole(RoleId.RemoteSheriff) ||
-                PlayerControl.LocalPlayer.isRole(RoleId.Demon)
+                PlayerControl.LocalPlayer.isRole(RoleId.Demon) ||
+                PlayerControl.LocalPlayer.isRole(RoleId.Arsonist)
                 )
             {
                 HudManager.Instance.KillButton.gameObject.SetActive(true);
@@ -357,7 +423,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                         UpdateDate = 15;
                         if (RoleClass.IsMeeting)
                         {
-                            SetDefaultNames();
+                            //SetDefaultNames();
                         }
                         else
                         {
@@ -369,6 +435,11 @@ namespace SuperNewRoles.Mode.SuperHostRoles
         }
         public static void SetDefaultNames()
         {
+            var caller = new System.Diagnostics.StackFrame(1, false);
+            var callerMethod = caller.GetMethod();
+            string callerMethodName = callerMethod.Name;
+            string callerClassName = callerMethod.DeclaringType.FullName;
+            SuperNewRolesPlugin.Logger.LogInfo("SetDefaultNamesが" + callerClassName + "." + callerMethodName + "から呼び出されました。");
             foreach (PlayerControl p in PlayerControl.AllPlayerControls)
             {
                 p.RpcSetName(p.getDefaultName());
