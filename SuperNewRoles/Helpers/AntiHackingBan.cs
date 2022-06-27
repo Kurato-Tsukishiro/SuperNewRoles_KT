@@ -1,10 +1,10 @@
-﻿using Assets.CoreScripts;
-using HarmonyLib;
-using Hazel;
-using InnerNet;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Assets.CoreScripts;
+using HarmonyLib;
+using Hazel;
+using InnerNet;
 
 namespace SuperNewRoles.Helpers
 {
@@ -99,16 +99,16 @@ namespace SuperNewRoles.Helpers
                     __result = false;
                     return false;
                 }
-                if (AmongUsClient.Instance.AmClient && DestroyableSingleton<HudManager>.Instance)
+                if (AmongUsClient.Instance.AmClient && FastDestroyableSingleton<HudManager>.Instance)
                 {
-                    DestroyableSingleton<HudManager>.Instance.Chat.AddChat(__instance, chatText);
+                    FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(__instance, chatText);
                 }
                 if (chatText.IndexOf("who", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     DestroyableSingleton<Telemetry>.Instance.SendWho();
                 }
                 MessageWriter obj = AmongUsClient.Instance.StartRpc(__instance.NetId, 13, SendOption.None);
-                obj.Write(chatText); 
+                obj.Write(chatText);
                 obj.EndMessage();
                 __result = true;
                 return false;

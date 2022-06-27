@@ -1,12 +1,11 @@
-﻿using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using HarmonyLib;
 using Hazel;
 using SuperNewRoles.CustomOption;
 using SuperNewRoles.CustomRPC;
 using SuperNewRoles.Roles;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 
 namespace SuperNewRoles.Mode.SuperHostRoles
 {
@@ -30,7 +29,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     break;
                 case RoleId.Sheriff:
                     optdata.ImpostorLightMod = optdata.CrewLightMod;
-                    var switchSystem = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                    var switchSystem = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                     if (switchSystem != null && switchSystem.IsActive)
                     {
                         optdata.ImpostorLightMod /= 5;
@@ -60,7 +59,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     if (RoleClass.MadMate.IsImpostorLight)
                     {
                         optdata.CrewLightMod = optdata.ImpostorLightMod;
-                        var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                        var switchSystem2 = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                         if (switchSystem2 != null && switchSystem2.IsActive)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
@@ -76,7 +75,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     if (RoleClass.MadMayor.IsImpostorLight)
                     {
                         optdata.CrewLightMod = optdata.ImpostorLightMod;
-                        var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                        var switchSystem2 = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                         if (switchSystem2 != null && switchSystem2.IsActive)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
@@ -92,7 +91,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     if (RoleClass.MadStuntMan.IsImpostorLight)
                     {
                         optdata.CrewLightMod = optdata.ImpostorLightMod;
-                        var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                        var switchSystem2 = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                         if (switchSystem2 != null && switchSystem2.IsActive)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
@@ -108,7 +107,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     if (RoleClass.MadJester.IsImpostorLight)
                     {
                         optdata.CrewLightMod = optdata.ImpostorLightMod;
-                        var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                        var switchSystem2 = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                         if (switchSystem2 != null && switchSystem2.IsActive)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
@@ -116,13 +115,28 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     }
                     break;
                 case RoleId.MadMaker:
-                    if (!RoleClass.MadMaker.IsImpostorLight)
+                    if (!player.IsMod())
                     {
-                        optdata.ImpostorLightMod = optdata.CrewLightMod;
-                        var switchSystemMadMaker = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
-                        if (switchSystemMadMaker != null && switchSystemMadMaker.IsActive)
+                        if (!RoleClass.MadMaker.IsImpostorLight)
                         {
-                            optdata.ImpostorLightMod /= 5;
+                            optdata.ImpostorLightMod = optdata.CrewLightMod;
+                            var switchSystemMadMaker = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
+                            if (switchSystemMadMaker != null && switchSystemMadMaker.IsActive)
+                            {
+                                optdata.ImpostorLightMod /= 5;
+                            }
+                        }
+                    }
+                    if (player.IsMod())
+                    {
+                        if (RoleClass.MadMaker.IsImpostorLight)
+                        {
+                            optdata.CrewLightMod = optdata.ImpostorLightMod;
+                            var switchSystem2 = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
+                            if (switchSystem2 != null && switchSystem2.IsActive)
+                            {
+                                optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
+                            }
                         }
                     }
                     if (RoleClass.MadMaker.CreatePlayers.Contains(player.PlayerId))
@@ -143,7 +157,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     if (RoleClass.JackalFriends.IsImpostorLight)
                     {
                         optdata.CrewLightMod = optdata.ImpostorLightMod;
-                        var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                        var switchSystem2 = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                         if (switchSystem2 != null && switchSystem2.IsActive)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
@@ -159,7 +173,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     if (RoleClass.Fox.IsImpostorLight)
                     {
                         optdata.CrewLightMod = optdata.ImpostorLightMod;
-                        var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                        var switchSystem2 = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                         if (switchSystem2 != null && switchSystem2.IsActive)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
@@ -168,7 +182,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     break;
                 case RoleId.truelover:
                     optdata.ImpostorLightMod = optdata.CrewLightMod;
-                    var switchSystemtruelover = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                    var switchSystemtruelover = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                     if (switchSystemtruelover != null && switchSystemtruelover.IsActive)
                     {
                         optdata.ImpostorLightMod /= 5;
@@ -194,7 +208,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     break;
                 case RoleId.FalseCharges:
                     optdata.ImpostorLightMod = optdata.CrewLightMod;
-                    var switchSystemFalseCharges = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                    var switchSystemFalseCharges = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                     if (switchSystemFalseCharges != null && switchSystemFalseCharges.IsActive)
                     {
                         optdata.ImpostorLightMod /= 5;
@@ -203,7 +217,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     break;
                 case RoleId.RemoteSheriff:
                     optdata.ImpostorLightMod = optdata.CrewLightMod;
-                    var switchSystemRemoteSheriff = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                    var switchSystemRemoteSheriff = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                     if (switchSystemRemoteSheriff != null && switchSystemRemoteSheriff.IsActive)
                     {
                         optdata.ImpostorLightMod /= 5;
@@ -226,7 +240,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     break;
                 case RoleId.Arsonist:
                     optdata.ImpostorLightMod = optdata.CrewLightMod;
-                    var switchSystemArsonist = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                    var switchSystemArsonist = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                     if (switchSystemArsonist != null && switchSystemArsonist.IsActive)
                     {
                         optdata.ImpostorLightMod /= 5;
@@ -236,7 +250,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     optdata.KillCooldown = KillCoolSet(RoleClass.Arsonist.CoolTime);
                     break;
                 case RoleId.Nocturnality:
-                    var switchSystemNocturnality = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                    var switchSystemNocturnality = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                     if (switchSystemNocturnality == null || !switchSystemNocturnality.IsActive)
                     {
                         optdata.CrewLightMod /= 5;
@@ -254,14 +268,17 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     optdata.killCooldown = KillCoolSet(RoleClass.Survivor.KillCoolTime);
                     break;
                 case RoleId.Jackal:
-                    if (!RoleClass.Jackal.IsImpostorLight)
+                    if (!player.IsMod())
                     {
-                        optdata.ImpostorLightMod = optdata.CrewLightMod;
-                        var switchSystemJackal = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
-
-                        if (switchSystemJackal != null && switchSystemJackal.IsActive)
+                        if (!RoleClass.Jackal.IsImpostorLight)
                         {
-                            optdata.ImpostorLightMod /= 5;
+                            optdata.ImpostorLightMod = optdata.CrewLightMod;
+                            var switchSystemJackal = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
+
+                            if (switchSystemJackal != null && switchSystemJackal.IsActive)
+                            {
+                                optdata.ImpostorLightMod /= 5;
+                            }
                         }
                     }
                     if (player.IsMod())
@@ -269,14 +286,14 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                         if (RoleClass.Jackal.IsImpostorLight)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod;
-                            var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                            var switchSystem2 = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                             if (switchSystem2 != null && switchSystem2.IsActive)
                             {
                                 optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
                             }
                         }
                     }
-                        optdata.KillCooldown = KillCoolSet(RoleClass.Jackal.KillCoolDown);
+                    optdata.KillCooldown = KillCoolSet(RoleClass.Jackal.KillCoolDown);
                     break;
                 case RoleId.Demon:
                     optdata.KillCooldown = KillCoolSet(RoleClass.Demon.CoolTime);
@@ -290,7 +307,30 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                     if (RoleClass.MayorFriends.IsImpostorLight)
                     {
                         optdata.CrewLightMod = optdata.ImpostorLightMod;
-                        var switchSystem2 = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                        var switchSystem2 = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
+                        if (switchSystem2 != null && switchSystem2.IsActive)
+                        {
+                            optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
+                        }
+                    }
+                    break;
+                case RoleId.Tuna:
+                    if (RoleClass.Tuna.IsUseVent)
+                    {
+                        optdata.RoleOptions.EngineerCooldown = 0f;
+                        optdata.RoleOptions.EngineerInVentMaxTime = 0f;
+                    }
+                    break;
+                case RoleId.BlackCat:
+                    if (RoleClass.BlackCat.IsUseVent)
+                    {
+                        optdata.RoleOptions.EngineerCooldown = 0f;
+                        optdata.RoleOptions.EngineerInVentMaxTime = 0f;
+                    }
+                    if (RoleClass.BlackCat.IsImpostorLight)
+                    {
+                        optdata.CrewLightMod = optdata.ImpostorLightMod;
+                        var switchSystem2 = MapUtilities.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                         if (switchSystem2 != null && switchSystem2.IsActive)
                         {
                             optdata.CrewLightMod = optdata.ImpostorLightMod * 15;
@@ -301,7 +341,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
             if (player.isDead()) optdata.AnonymousVotes = false;
             optdata.RoleOptions.ShapeshifterLeaveSkin = false;
             if (player.AmOwner) PlayerControl.GameOptions = optdata;
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SyncSettings, SendOption.None, player.getClientId());
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)RpcCalls.SyncSettings, SendOption.None, player.getClientId());
             writer.WriteBytesAndSize(optdata.ToBytes(5));
             AmongUsClient.Instance.FinishRpcImmediately(writer);
         }
@@ -310,7 +350,8 @@ namespace SuperNewRoles.Mode.SuperHostRoles
             if (cool <= 0)
             {
                 return 0.001f;
-            } else
+            }
+            else
             {
                 return cool;
             }
@@ -321,6 +362,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
             if (!ModeHandler.isMode(ModeId.SuperHostRoles)) return;
             var role = player.getRole();
             var optdata = OptionData.DeepCopy();
+
             switch (role)
             {
                 case RoleId.Demon:
@@ -329,7 +371,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
                 case RoleId.Arsonist:
                     optdata.KillCooldown = KillCoolSet(RoleClass.Arsonist.CoolTime) * 2;
                     optdata.ImpostorLightMod = optdata.CrewLightMod;
-                    var switchSystemArsonist = ShipStatus.Instance.Systems[SystemTypes.Electrical].Cast<SwitchSystem>();
+                    var switchSystemArsonist = MapUtilities.CachedShipStatus.Systems[SystemTypes.Electrical].CastFast<SwitchSystem>();
                     if (switchSystemArsonist != null && switchSystemArsonist.IsActive)
                     {
                         optdata.ImpostorLightMod /= 5;
@@ -343,7 +385,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
             if (player.isDead()) optdata.AnonymousVotes = false;
             optdata.RoleOptions.ShapeshifterLeaveSkin = false;
             if (player.AmOwner) PlayerControl.GameOptions = optdata;
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SyncSettings, SendOption.None, player.getClientId());
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)RpcCalls.SyncSettings, SendOption.None, player.getClientId());
             writer.WriteBytesAndSize(optdata.ToBytes(5));
             AmongUsClient.Instance.FinishRpcImmediately(writer);
         }
@@ -355,18 +397,19 @@ namespace SuperNewRoles.Mode.SuperHostRoles
             if (RoleClass.EvilGambler.GetSuc())
             {
                 optdata.KillCooldown = KillCoolSet(RoleClass.EvilGambler.SucCool);
-            } else
+            }
+            else
             {
                 optdata.KillCooldown = KillCoolSet(RoleClass.EvilGambler.NotSucCool);
             }
             if (p.AmOwner) PlayerControl.GameOptions = optdata;
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SyncSettings, SendOption.None, p.getClientId());
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)RpcCalls.SyncSettings, SendOption.None, p.getClientId());
             writer.WriteBytesAndSize(optdata.ToBytes(5));
             AmongUsClient.Instance.FinishRpcImmediately(writer);
         }
         public static void CustomSyncSettings()
         {
-            foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+            foreach (PlayerControl p in CachedPlayer.AllPlayers)
             {
                 if (!p.Data.Disconnected && p.IsPlayer())
                 {
@@ -384,7 +427,7 @@ namespace SuperNewRoles.Mode.SuperHostRoles
         {
             public static void Prefix()
             {
-             //   BotHandler.CreateBot();
+                //   BotHandler.CreateBot();
             }
             public static void Postfix()
             {

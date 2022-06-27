@@ -1,14 +1,6 @@
 using HarmonyLib;
-using Hazel;
-using SuperNewRoles.Buttons;
 using SuperNewRoles.CustomRPC;
-using SuperNewRoles.Patches;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using SuperNewRoles.CustomOption;
 
 namespace SuperNewRoles.Roles
 {
@@ -20,8 +12,9 @@ namespace SuperNewRoles.Roles
             {
                 if (!RoleClass.Fox.UseReport)
                 {
-                    if (HudManager.Instance.ReportButton.gameObject.active) {
-                        HudManager.Instance.ReportButton.SetActive(false);
+                    if (FastDestroyableSingleton<HudManager>.Instance.ReportButton.gameObject.active)
+                    {
+                        FastDestroyableSingleton<HudManager>.Instance.ReportButton.SetActive(false);
                     }
                 }
             }
@@ -30,8 +23,8 @@ namespace SuperNewRoles.Roles
         {
             if (target == null || target.MyRend == null) return;
 
-            target.MyRend.material.SetFloat("_Outline", 1f);
-            target.MyRend.material.SetColor("_OutlineColor", color);
+            target.MyRend().material.SetFloat("_Outline", 1f);
+            target.MyRend().material.SetColor("_OutlineColor", color);
         }
         public class FixedUpdate
         {
@@ -62,6 +55,5 @@ namespace SuperNewRoles.Roles
                 }
             }
         }
-
     }
 }

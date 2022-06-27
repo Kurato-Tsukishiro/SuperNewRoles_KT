@@ -1,18 +1,19 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using HarmonyLib;
 using Hazel;
-using System;
-using UnityEngine;
 using SuperNewRoles.Buttons;
-using System.Collections.Generic;
-using System.Linq;
-using SuperNewRoles.Roles;
-using SuperNewRoles.Patches;
-using System.Collections;
-using SuperNewRoles.Mode;
-using SuperNewRoles.Helpers;
 using SuperNewRoles.CustomRPC;
 using SuperNewRoles.EndGame;
+using SuperNewRoles.CustomOption;
+using SuperNewRoles.Helpers;
+using SuperNewRoles.Mode;
+using SuperNewRoles.Patches;
+using SuperNewRoles.Roles;
+using UnityEngine;
 
 namespace SuperNewRoles.Buttons
 {
@@ -33,7 +34,6 @@ namespace SuperNewRoles.Buttons
         public static CustomButton DoctorVitalsButton;
         public static CustomButton CountChangerButton;
         public static CustomButton ScientistButton;
-
         public static CustomButton HawkHawkEyeButton;
         public static CustomButton FreezerFreezeButton;
         public static CustomButton JackalKillButton;
@@ -62,10 +62,12 @@ namespace SuperNewRoles.Buttons
         public static CustomButton GhostMechanicRepairButton;
         public static CustomButton EvilHackerButton;
         public static CustomButton EvilHackerMadmateSetting;
+        public static CustomButton PositionSwapperButton;
 
         public static TMPro.TMP_Text sheriffNumShotsText;
         public static TMPro.TMP_Text CleanerNumCleanText;
         public static TMPro.TMP_Text GhostMechanicNumRepairText;
+        public static TMPro.TMP_Text PositionSwapperNumText;
 
         public static void setCustomButtonCooldowns()
         {
@@ -85,7 +87,6 @@ namespace SuperNewRoles.Buttons
 
         public static void Postfix(HudManager __instance)
         {
-
             FalseChargesFalseChargeButton = new CustomButton(
                 () =>
                 {
@@ -119,78 +120,81 @@ namespace SuperNewRoles.Buttons
                 __instance.KillButton,
                 KeyCode.Q,
                 8
-            );
-
-            FalseChargesFalseChargeButton.buttonText = ModTranslation.getString("FalseChargesButtonTitle");
-            FalseChargesFalseChargeButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("FalseChargesButtonTitle"),
+                showButtonText = true
+            };
 
             trueloverLoveButton = new CustomButton(
-                  () =>
-                  {
-                      if (PlayerControl.LocalPlayer.CanMove && !RoleClass.truelover.IsCreate && !PlayerControl.LocalPlayer.IsLovers())
-                      {
-                          var target = setTarget();
-                          if (target == null || target.IsLovers()) return;
-                          RoleClass.truelover.IsCreate = true;
-                          RoleHelpers.SetLovers(PlayerControl.LocalPlayer, target);
-                          RoleHelpers.SetLoversRPC(PlayerControl.LocalPlayer, target);
-                      }
-                  },
-                  () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.truelover) && !RoleClass.truelover.IsCreate; },
-                  () =>
-                  {
-                      return PlayerControl.LocalPlayer.CanMove && setTarget();
-                  },
-                  () => { trueloverLoveButton.Timer = 0f; trueloverLoveButton.MaxTimer = 0f; },
-                  RoleClass.truelover.getButtonSprite(),
-                  new Vector3(-1.8f, -0.06f, 0),
-                  __instance,
-                  __instance.AbilityButton,
-                  KeyCode.F,
-                  49
-              );
-
-            trueloverLoveButton.buttonText = ModTranslation.getString("trueloverloveButtonName");
-            trueloverLoveButton.showButtonText = true;
+                () =>
+                {
+                    if (PlayerControl.LocalPlayer.CanMove && !RoleClass.truelover.IsCreate && !PlayerControl.LocalPlayer.IsLovers())
+                    {
+                        var target = setTarget();
+                        if (target == null || target.IsLovers()) return;
+                        RoleClass.truelover.IsCreate = true;
+                        RoleHelpers.SetLovers(PlayerControl.LocalPlayer, target);
+                        RoleHelpers.SetLoversRPC(PlayerControl.LocalPlayer, target);
+                    }
+                },
+                () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.truelover) && !RoleClass.truelover.IsCreate; },
+                () =>
+                {
+                    return PlayerControl.LocalPlayer.CanMove && setTarget();
+                },
+                () => { trueloverLoveButton.Timer = 0f; trueloverLoveButton.MaxTimer = 0f; },
+                RoleClass.truelover.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            )
+            {
+                buttonText = ModTranslation.getString("trueloverloveButtonName"),
+                showButtonText = true
+            };
 
             MagazinerGetButton = new CustomButton(
-                  () =>
-                  {
-                      if (PlayerControl.LocalPlayer.CanMove && RoleClass.Magaziner.MyPlayerCount >= 1 && HudManager.Instance.KillButton.isCoolingDown && RoleClass.Magaziner.IsOKSet)
-                      {
-                          PlayerControl.LocalPlayer.SetKillTimerUnchecked(RoleClass.Magaziner.SetTime);
-                          RoleClass.Magaziner.MyPlayerCount--;
-                          if (RoleClass.Magaziner.SetTime != 0)
-                          {
-                              RoleClass.Magaziner.IsOKSet = false;
-                              new LateTask(() =>
-                              {
-                                  RoleClass.Magaziner.IsOKSet = true;
-                              }, 1f, "IsOkSetSet");
-                          }
-                      }
-                  },
-                  () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Magaziner); },
-                  () =>
-                  {
-                      return PlayerControl.LocalPlayer.CanMove && HudManager.Instance.KillButton.isCoolingDown && RoleClass.Magaziner.MyPlayerCount >= 1;
-                  },
-                  () => { MagazinerGetButton.Timer = 0f; MagazinerGetButton.MaxTimer = 0f; },
-                  RoleClass.Magaziner.getGetButtonSprite(),
-                  new Vector3(-2.7f, -0.06f, 0),
-                  __instance,
-                  __instance.AbilityButton,
-                  KeyCode.F,
-                  49
-              );
-
-            MagazinerGetButton.buttonText = ModTranslation.getString("MagazinerGetButtonName");
-            MagazinerGetButton.showButtonText = true;
+                () =>
+                {
+                    if (PlayerControl.LocalPlayer.CanMove && RoleClass.Magaziner.MyPlayerCount >= 1 && FastDestroyableSingleton<HudManager>.Instance.KillButton.isCoolingDown && RoleClass.Magaziner.IsOKSet)
+                    {
+                        PlayerControl.LocalPlayer.SetKillTimerUnchecked(RoleClass.Magaziner.SetTime);
+                        RoleClass.Magaziner.MyPlayerCount--;
+                        if (RoleClass.Magaziner.SetTime != 0)
+                        {
+                            RoleClass.Magaziner.IsOKSet = false;
+                            new LateTask(() =>
+                            {
+                                RoleClass.Magaziner.IsOKSet = true;
+                            }, 1f, "IsOkSetSet");
+                        }
+                    }
+                },
+                () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Magaziner); },
+                () =>
+                {
+                    return PlayerControl.LocalPlayer.CanMove && FastDestroyableSingleton<HudManager>.Instance.KillButton.isCoolingDown && RoleClass.Magaziner.MyPlayerCount >= 1;
+                },
+                () => { MagazinerGetButton.Timer = 0f; MagazinerGetButton.MaxTimer = 0f; },
+                RoleClass.Magaziner.getGetButtonSprite(),
+                new Vector3(-2.7f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            )
+            {
+                buttonText = ModTranslation.getString("MagazinerGetButtonName"),
+                showButtonText = true
+            };
 
             MagazinerAddButton = new CustomButton(
                 () =>
                 {
-                    if (!HudManager.Instance.KillButton.isCoolingDown && PlayerControl.LocalPlayer.CanMove)
+                    if (!FastDestroyableSingleton<HudManager>.Instance.KillButton.isCoolingDown && PlayerControl.LocalPlayer.CanMove)
                     {
                         PlayerControl.LocalPlayer.SetKillTimerUnchecked(PlayerControl.GameOptions.KillCooldown);
                         RoleClass.Magaziner.MyPlayerCount++;
@@ -199,7 +203,7 @@ namespace SuperNewRoles.Buttons
                 () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Magaziner); },
                 () =>
                 {
-                    return PlayerControl.LocalPlayer.CanMove && !HudManager.Instance.KillButton.isCoolingDown;
+                    return PlayerControl.LocalPlayer.CanMove && !FastDestroyableSingleton<HudManager>.Instance.KillButton.isCoolingDown;
                 },
                 () => { MagazinerAddButton.Timer = 0f; MagazinerAddButton.MaxTimer = 0f; },
                 RoleClass.Magaziner.getAddButtonSprite(),
@@ -208,10 +212,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            MagazinerAddButton.buttonText = ModTranslation.getString("MagazinerAddButtonName");
-            MagazinerAddButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("MagazinerAddButtonName"),
+                showButtonText = true
+            };
 
             ScientistButton = new Buttons.CustomButton(
                 () =>
@@ -233,154 +238,155 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            ScientistButton.buttonText = ModTranslation.getString("ScientistButtonName");
-            ScientistButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("ScientistButtonName"),
+                showButtonText = true
+            };
 
             HawkHawkEyeButton = new CustomButton(
-               () =>
-               {
-                   if (PlayerControl.LocalPlayer.CanMove)
-                   {
-                       if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Hawk))
-                       {
-                           RoleClass.Hawk.Timer = RoleClass.Hawk.DurationTime;
-                           RoleClass.Hawk.ButtonTimer = DateTime.Now;
-                           HawkHawkEyeButton.MaxTimer = RoleClass.Hawk.CoolTime;
-                           HawkHawkEyeButton.Timer = RoleClass.Hawk.CoolTime;
-                       }
-                       if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.NiceHawk))
-                       {
-                           RoleClass.NiceHawk.Timer = RoleClass.NiceHawk.DurationTime;
-                           RoleClass.NiceHawk.ButtonTimer = DateTime.Now;
-                           HawkHawkEyeButton.MaxTimer = RoleClass.NiceHawk.CoolTime;
-                           HawkHawkEyeButton.Timer = RoleClass.NiceHawk.CoolTime;
-                           RoleClass.NiceHawk.Postion = PlayerControl.LocalPlayer.transform.localPosition;
-                           RoleClass.NiceHawk.timer1 = 10;
-                           RoleClass.NiceHawk.Timer2 = DateTime.Now;
-                       }
-                       if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.MadHawk))
-                       {
-                           RoleClass.MadHawk.Timer = RoleClass.MadHawk.DurationTime;
-                           RoleClass.MadHawk.ButtonTimer = DateTime.Now;
-                           HawkHawkEyeButton.MaxTimer = RoleClass.MadHawk.CoolTime;
-                           HawkHawkEyeButton.Timer = RoleClass.MadHawk.CoolTime;
-                           RoleClass.MadHawk.Postion = PlayerControl.LocalPlayer.transform.localPosition;
-                           RoleClass.MadHawk.timer1 = 10;
-                           RoleClass.MadHawk.Timer2 = DateTime.Now;
-                       }
-                       RoleClass.Hawk.IsHawkOn = true;
-                   }
-               },
-               () => { return PlayerControl.LocalPlayer.isAlive() && PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Hawk) || PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.NiceHawk) || PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.MadHawk); },
-               () =>
-               {
-                   return PlayerControl.LocalPlayer.CanMove;
-               },
-               () =>
-               {
-                   if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Hawk))
-                   {
-                       HawkHawkEyeButton.MaxTimer = RoleClass.Hawk.CoolTime;
-                       HawkHawkEyeButton.Timer = RoleClass.Hawk.CoolTime;
-                   }
-                   if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.NiceHawk))
-                   {
-                       HawkHawkEyeButton.MaxTimer = RoleClass.NiceHawk.CoolTime;
-                       HawkHawkEyeButton.Timer = RoleClass.NiceHawk.CoolTime;
-                   }
-                   if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.MadHawk))
-                   {
-                       HawkHawkEyeButton.MaxTimer = RoleClass.MadHawk.CoolTime;
-                       HawkHawkEyeButton.Timer = RoleClass.MadHawk.CoolTime;
-                   }
-                   RoleClass.Hawk.IsHawkOn = false;
-               },
-               RoleClass.Hawk.getButtonSprite(),
-               new Vector3(-1.8f, -0.06f, 0),
-               __instance,
-               __instance.AbilityButton,
-               KeyCode.F,
-               49
-            );
-
-            HawkHawkEyeButton.buttonText = ModTranslation.getString("HawkButtonName");
-            HawkHawkEyeButton.showButtonText = true;
+                () =>
+                {
+                    if (PlayerControl.LocalPlayer.CanMove)
+                    {
+                        if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Hawk))
+                        {
+                            RoleClass.Hawk.Timer = RoleClass.Hawk.DurationTime;
+                            RoleClass.Hawk.ButtonTimer = DateTime.Now;
+                            HawkHawkEyeButton.MaxTimer = RoleClass.Hawk.CoolTime;
+                            HawkHawkEyeButton.Timer = RoleClass.Hawk.CoolTime;
+                        }
+                        if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.NiceHawk))
+                        {
+                            RoleClass.NiceHawk.Timer = RoleClass.NiceHawk.DurationTime;
+                            RoleClass.NiceHawk.ButtonTimer = DateTime.Now;
+                            HawkHawkEyeButton.MaxTimer = RoleClass.NiceHawk.CoolTime;
+                            HawkHawkEyeButton.Timer = RoleClass.NiceHawk.CoolTime;
+                            RoleClass.NiceHawk.Postion = CachedPlayer.LocalPlayer.transform.localPosition;
+                            RoleClass.NiceHawk.timer1 = 10;
+                            RoleClass.NiceHawk.Timer2 = DateTime.Now;
+                        }
+                        if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.MadHawk))
+                        {
+                            RoleClass.MadHawk.Timer = RoleClass.MadHawk.DurationTime;
+                            RoleClass.MadHawk.ButtonTimer = DateTime.Now;
+                            HawkHawkEyeButton.MaxTimer = RoleClass.MadHawk.CoolTime;
+                            HawkHawkEyeButton.Timer = RoleClass.MadHawk.CoolTime;
+                            RoleClass.MadHawk.Postion = CachedPlayer.LocalPlayer.transform.localPosition;
+                            RoleClass.MadHawk.timer1 = 10;
+                            RoleClass.MadHawk.Timer2 = DateTime.Now;
+                        }
+                        RoleClass.Hawk.IsHawkOn = true;
+                    }
+                },
+                () => { return (PlayerControl.LocalPlayer.isAlive() && PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Hawk)) || PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.NiceHawk) || PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.MadHawk); },
+                () =>
+                {
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
+                () =>
+                {
+                    if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Hawk))
+                    {
+                        HawkHawkEyeButton.MaxTimer = RoleClass.Hawk.CoolTime;
+                        HawkHawkEyeButton.Timer = RoleClass.Hawk.CoolTime;
+                    }
+                    if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.NiceHawk))
+                    {
+                        HawkHawkEyeButton.MaxTimer = RoleClass.NiceHawk.CoolTime;
+                        HawkHawkEyeButton.Timer = RoleClass.NiceHawk.CoolTime;
+                    }
+                    if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.MadHawk))
+                    {
+                        HawkHawkEyeButton.MaxTimer = RoleClass.MadHawk.CoolTime;
+                        HawkHawkEyeButton.Timer = RoleClass.MadHawk.CoolTime;
+                    }
+                    RoleClass.Hawk.IsHawkOn = false;
+                },
+                RoleClass.Hawk.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            )
+            {
+                buttonText = ModTranslation.getString("HawkButtonName"),
+                showButtonText = true
+            };
 
             CountChangerButton = new CustomButton(
-               () =>
-               {
-                   if (RoleClass.CountChanger.Count >= 1 && setTarget() && PlayerControl.LocalPlayer.CanMove)
-                   {
-                       RoleClass.CountChanger.IsSet = true;
-                       RoleClass.CountChanger.Count--;
-                       var Target = PlayerControlFixedUpdatePatch.setTarget(onlyCrewmates: true);
-                       var TargetID = Target.PlayerId;
-                       var LocalID = PlayerControl.LocalPlayer.PlayerId;
+                () =>
+                {
+                    if (RoleClass.CountChanger.Count >= 1 && setTarget() && PlayerControl.LocalPlayer.CanMove)
+                    {
+                        RoleClass.CountChanger.IsSet = true;
+                        RoleClass.CountChanger.Count--;
+                        var Target = PlayerControlFixedUpdatePatch.setTarget(onlyCrewmates: true);
+                        var TargetID = Target.PlayerId;
+                        var LocalID = CachedPlayer.LocalPlayer.PlayerId;
 
-                       CustomRPC.RPCProcedure.CountChangerSetRPC(LocalID, TargetID);
-
-                       MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CountChangerSetRPC, Hazel.SendOption.Reliable, -1);
-                       killWriter.Write(LocalID);
-                       killWriter.Write(TargetID);
-                       AmongUsClient.Instance.FinishRpcImmediately(killWriter);
-                   }
-               },
-               () => { return PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.CountChanger) && !RoleClass.CountChanger.IsSet && RoleClass.CountChanger.Count >= 1 && PlayerControl.LocalPlayer.isAlive(); },
-               () =>
-               {
-                   return PlayerControl.LocalPlayer.CanMove && PlayerControlFixedUpdatePatch.setTarget(onlyCrewmates: true);
-               },
-               () =>
-               {
-                   CountChangerButton.MaxTimer = PlayerControl.GameOptions.KillCooldown;
-                   CountChangerButton.Timer = PlayerControl.GameOptions.KillCooldown;
-               },
-               RoleClass.CountChanger.getButtonSprite(),
-               new Vector3(-1.8f, -0.06f, 0),
-               __instance,
-               __instance.AbilityButton,
-               KeyCode.F,
-               49
-            );
-
-            CountChangerButton.buttonText = ModTranslation.getString("CountChangerButtonName");
-            CountChangerButton.showButtonText = true;
+                        CustomRPC.RPCProcedure.CountChangerSetRPC(LocalID, TargetID);
+                        MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CountChangerSetRPC, Hazel.SendOption.Reliable, -1);
+                        killWriter.Write(LocalID);
+                        killWriter.Write(TargetID);
+                        AmongUsClient.Instance.FinishRpcImmediately(killWriter);
+                    }
+                },
+                () => { return PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.CountChanger) && !RoleClass.CountChanger.IsSet && RoleClass.CountChanger.Count >= 1 && PlayerControl.LocalPlayer.isAlive(); },
+                () =>
+                {
+                    return PlayerControl.LocalPlayer.CanMove && PlayerControlFixedUpdatePatch.setTarget(onlyCrewmates: true);
+                },
+                () =>
+                {
+                    CountChangerButton.MaxTimer = PlayerControl.GameOptions.KillCooldown;
+                    CountChangerButton.Timer = PlayerControl.GameOptions.KillCooldown;
+                },
+                RoleClass.CountChanger.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            )
+            {
+                buttonText = ModTranslation.getString("CountChangerButtonName"),
+                showButtonText = true
+            };
 
             DoctorVitalsButton = new CustomButton(
-               () =>
-               {
-                   if (RoleClass.Doctor.Vital == null)
-                   {
-                       var e = UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"));
-                       if (e == null || Camera.main == null) return;
-                       RoleClass.Doctor.Vital = UnityEngine.Object.Instantiate(e.MinigamePrefab, Camera.main.transform, false);
-                   }
-                   RoleClass.Doctor.Vital.transform.SetParent(Camera.main.transform, false);
-                   RoleClass.Doctor.Vital.transform.localPosition = new Vector3(0.0f, 0.0f, -50f);
-                   RoleClass.Doctor.Vital.Begin(null);
-
-               },
-               () => { return PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Doctor) && PlayerControl.LocalPlayer.CanMove; },
-               () =>
-               {
-                   return PlayerControl.LocalPlayer.CanMove;
-               },
-               () =>
-               {
-               },
-               RoleClass.Doctor.getVitalsSprite(),
-               new Vector3(-1.8f, -0.06f, 0),
-               __instance,
-               __instance.AbilityButton,
-               KeyCode.F,
-               49
-            );
-
-
-            DoctorVitalsButton.buttonText = ModTranslation.getString("DoctorVitalName");
-            DoctorVitalsButton.showButtonText = true;
+                () =>
+                {
+                    if (RoleClass.Doctor.Vital == null)
+                    {
+                        var e = UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"));
+                        if (e == null || Camera.main == null) return;
+                        RoleClass.Doctor.Vital = UnityEngine.Object.Instantiate(e.MinigamePrefab, Camera.main.transform, false);
+                    }
+                    RoleClass.Doctor.Vital.transform.SetParent(Camera.main.transform, false);
+                    RoleClass.Doctor.Vital.transform.localPosition = new Vector3(0.0f, 0.0f, -50f);
+                    RoleClass.Doctor.Vital.Begin(null);
+                },
+                () => { return PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Doctor) && PlayerControl.LocalPlayer.CanMove; },
+                () =>
+                {
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
+                () =>
+                {
+                },
+                RoleClass.Doctor.getVitalsSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            )
+            {
+                buttonText = ModTranslation.getString("DoctorVitalName"),
+                showButtonText = true
+            };
 
             JackalSidekickButton = new CustomButton(
                 () =>
@@ -389,7 +395,7 @@ namespace SuperNewRoles.Buttons
                     if (target && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.CanMove && RoleClass.Jackal.IsCreateSidekick)
                     {
                         bool IsFakeSidekick = EvilEraser.IsBlockAndTryUse(EvilEraser.BlockTypes.JackalSidekick, target);
-                        MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CreateSidekick, Hazel.SendOption.Reliable, -1);
+                        MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CreateSidekick, Hazel.SendOption.Reliable, -1);
                         killWriter.Write(target.PlayerId);
                         killWriter.Write(IsFakeSidekick);
                         AmongUsClient.Instance.FinishRpcImmediately(killWriter);
@@ -413,10 +419,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            JackalSidekickButton.buttonText = ModTranslation.getString("JackalCreateSidekickButtonName");
-            JackalSidekickButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("JackalCreateSidekickButtonName"),
+                showButtonText = true
+            };
 
             JackalSeerSidekickButton = new CustomButton(
                 () =>
@@ -425,7 +432,7 @@ namespace SuperNewRoles.Buttons
                     if (target_JS && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.CanMove && RoleClass.JackalSeer.IsCreateSidekick)
                     {
                         bool IsFakeSidekickSeer = EvilEraser.IsBlockAndTryUse(EvilEraser.BlockTypes.JackalSeerSidekick, target_JS);
-                        MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CreateSidekickSeer, Hazel.SendOption.Reliable, -1);
+                        MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CreateSidekickSeer, Hazel.SendOption.Reliable, -1);
                         killWriter.Write(target_JS.PlayerId);
                         killWriter.Write(IsFakeSidekickSeer);
                         AmongUsClient.Instance.FinishRpcImmediately(killWriter);
@@ -449,9 +456,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-            JackalSeerSidekickButton.buttonText = ModTranslation.getString("JackalCreateSidekickButtonName");
-            JackalSeerSidekickButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("JackalCreateSidekickButtonName"),
+                showButtonText = true
+            };
 
             JackalKillButton = new CustomButton(
                 () =>
@@ -472,7 +481,7 @@ namespace SuperNewRoles.Buttons
                         JackalSeer.resetCoolDown();
                     }
                 },
-                () => { return ModeHandler.isMode(ModeId.Default) && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && RoleClass.Jackal.JackalPlayer.IsCheckListPlayerControl(PlayerControl.LocalPlayer) || RoleHelpers.isAlive(PlayerControl.LocalPlayer) && RoleClass.TeleportingJackal.TeleportingJackalPlayer.IsCheckListPlayerControl(PlayerControl.LocalPlayer) && RoleHelpers.isAlive(PlayerControl.LocalPlayer) || RoleClass.JackalSeer.JackalSeerPlayer.IsCheckListPlayerControl(PlayerControl.LocalPlayer); },
+                () => { return (ModeHandler.isMode(ModeId.Default) && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && RoleClass.Jackal.JackalPlayer.IsCheckListPlayerControl(PlayerControl.LocalPlayer)) || (RoleHelpers.isAlive(PlayerControl.LocalPlayer) && RoleClass.TeleportingJackal.TeleportingJackalPlayer.IsCheckListPlayerControl(PlayerControl.LocalPlayer) && RoleHelpers.isAlive(PlayerControl.LocalPlayer)) || RoleClass.JackalSeer.JackalSeerPlayer.IsCheckListPlayerControl(PlayerControl.LocalPlayer); },
                 () =>
                 {
                     return Jackal.JackalFixedPatch.JackalsetTarget() && PlayerControl.LocalPlayer.CanMove;
@@ -484,17 +493,17 @@ namespace SuperNewRoles.Buttons
                     if (PlayerControl.LocalPlayer.isRole(RoleId.Jackal)) { Jackal.EndMeeting(); }
                     if (PlayerControl.LocalPlayer.isRole(RoleId.JackalSeer)) { JackalSeer.EndMeeting(); }
                 },
-
                 __instance.KillButton.graphic.sprite,
                 new Vector3(0, 1, 0),
                 __instance,
                 __instance.KillButton,
                 KeyCode.Q,
                 8
-            );
-
-            JackalKillButton.buttonText = HudManager.Instance.KillButton.buttonLabelText.text;
-            JackalKillButton.showButtonText = true;
+            )
+            {
+                buttonText = FastDestroyableSingleton<HudManager>.Instance.KillButton.buttonLabelText.text,
+                showButtonText = true
+            };
 
             SelfBomberButton = new Buttons.CustomButton(
                 () =>
@@ -516,10 +525,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            SelfBomberButton.buttonText = ModTranslation.getString("SelfBomberButtonName");
-            SelfBomberButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("SelfBomberButtonName"),
+                showButtonText = true
+            };
 
             DoorrDoorButton = new Buttons.CustomButton(
                 () =>
@@ -543,10 +553,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            DoorrDoorButton.buttonText = ModTranslation.getString("DoorrButtonText");
-            DoorrDoorButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("DoorrButtonText"),
+                showButtonText = true
+            };
 
             TeleporterButton = new Buttons.CustomButton(
                 () =>
@@ -557,7 +568,7 @@ namespace SuperNewRoles.Buttons
                     Teleporter.TeleportStart();
                     Teleporter.ResetCoolDown();
                 },
-                () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && (Teleporter.IsTeleporter(PlayerControl.LocalPlayer) || RoleClass.Levelinger.IsPower(RoleClass.Levelinger.LevelPowerTypes.Teleporter)) || RoleHelpers.isAlive(PlayerControl.LocalPlayer) && (NiceTeleporter.IsNiceTeleporter(PlayerControl.LocalPlayer)) || RoleHelpers.isAlive(PlayerControl.LocalPlayer) && (TeleportingJackal.IsTeleportingJackal(PlayerControl.LocalPlayer)); },
+                () => { return (RoleHelpers.isAlive(PlayerControl.LocalPlayer) && (Teleporter.IsTeleporter(PlayerControl.LocalPlayer) || RoleClass.Levelinger.IsPower(RoleClass.Levelinger.LevelPowerTypes.Teleporter))) || (RoleHelpers.isAlive(PlayerControl.LocalPlayer) && NiceTeleporter.IsNiceTeleporter(PlayerControl.LocalPlayer)) || (RoleHelpers.isAlive(PlayerControl.LocalPlayer) && TeleportingJackal.IsTeleportingJackal(PlayerControl.LocalPlayer)); },
                 () =>
                 {
                     return true && PlayerControl.LocalPlayer.CanMove;
@@ -569,10 +580,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            TeleporterButton.buttonText = ModTranslation.getString("TeleporterTeleportButton");
-            TeleporterButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("TeleporterTeleportButton"),
+                showButtonText = true
+            };
 
             MovingSetButton = new Buttons.CustomButton(
                 () =>
@@ -596,10 +608,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            MovingSetButton.buttonText = ModTranslation.getString("MovingButtonSetName");
-            MovingSetButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("MovingButtonSetName"),
+                showButtonText = true
+            };
 
             MovingTpButton = new Buttons.CustomButton(
                 () =>
@@ -623,10 +636,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            MovingTpButton.buttonText = ModTranslation.getString("MovingButtonTpName");
-            MovingTpButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("MovingButtonTpName"),
+                showButtonText = true
+            };
 
             SheriffKillButton = new Buttons.CustomButton(
                 () =>
@@ -634,14 +648,14 @@ namespace SuperNewRoles.Buttons
                     if (PlayerControl.LocalPlayer.isRole(RoleId.RemoteSheriff))
                     {
                         DestroyableSingleton<RoleManager>.Instance.SetRole(PlayerControl.LocalPlayer, RoleTypes.Shapeshifter);
-                        foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+                        foreach (CachedPlayer p in CachedPlayer.AllPlayers)
                         {
                             p.Data.Role.NameColor = Color.white;
                         }
-                        PlayerControl.LocalPlayer.Data.Role.TryCast<ShapeshifterRole>().UseAbility();
-                        foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+                        CachedPlayer.LocalPlayer.Data.Role.TryCast<ShapeshifterRole>().UseAbility();
+                        foreach (CachedPlayer p in CachedPlayer.AllPlayers)
                         {
-                            if (p.isImpostor())
+                            if (p.PlayerControl.isImpostor())
                             {
                                 p.Data.Role.NameColor = RoleClass.ImpostorRed;
                             }
@@ -656,11 +670,10 @@ namespace SuperNewRoles.Buttons
                             var Target = PlayerControlFixedUpdatePatch.setTarget();
                             var misfire = !Roles.Sheriff.IsSheriffKill(Target);
                             var TargetID = Target.PlayerId;
-                            var LocalID = PlayerControl.LocalPlayer.PlayerId;
+                            var LocalID = CachedPlayer.LocalPlayer.PlayerId;
 
                             CustomRPC.RPCProcedure.SheriffKill(LocalID, TargetID, misfire);
-
-                            MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.SheriffKill, Hazel.SendOption.Reliable, -1);
+                            MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.SheriffKill, Hazel.SendOption.Reliable, -1);
                             killWriter.Write(LocalID);
                             killWriter.Write(TargetID);
                             killWriter.Write(misfire);
@@ -698,14 +711,11 @@ namespace SuperNewRoles.Buttons
                 KeyCode.Q,
                 8
             );
-
             sheriffNumShotsText = GameObject.Instantiate(SheriffKillButton.actionButton.cooldownTimerText, SheriffKillButton.actionButton.cooldownTimerText.transform.parent);
             sheriffNumShotsText.text = "";
             sheriffNumShotsText.enableWordWrapping = false;
             sheriffNumShotsText.transform.localScale = Vector3.one * 0.5f;
             sheriffNumShotsText.transform.localPosition += new Vector3(-0.05f, 0.7f, 0);
-
-
             SheriffKillButton.buttonText = ModTranslation.getString("SheriffKillButtonName");
             SheriffKillButton.showButtonText = true;
 
@@ -717,14 +727,10 @@ namespace SuperNewRoles.Buttons
                     ClergymanLightOutButton.actionButton.cooldownTimerText.color = new Color(0F, 0.8F, 0F);
                     Clergyman.LightOutStart();
                 },
-                () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && Clergyman.isClergyman(PlayerControl.LocalPlayer); },
+                () => { return PlayerControl.LocalPlayer.isAlive() && Clergyman.isClergyman(PlayerControl.LocalPlayer); },
                 () =>
                 {
-                    if (ClergymanLightOutButton.Timer <= 0)
-                    {
-                        return true;
-                    }
-                    return false;
+                    return ClergymanLightOutButton.Timer <= 0;
                 },
                 () => { Clergyman.EndMeeting(); },
                 RoleClass.Clergyman.getButtonSprite(),
@@ -733,10 +739,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            ClergymanLightOutButton.buttonText = ModTranslation.getString("ClergymanLightOutButtonName");
-            ClergymanLightOutButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("ClergymanLightOutButtonName"),
+                showButtonText = true
+            };
 
             SpeedBoosterBoostButton = new Buttons.CustomButton(
                 () =>
@@ -761,11 +768,12 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            SpeedBoosterBoostButton.buttonText = ModTranslation.getString("SpeedBoosterBoostButtonName");
-            SpeedBoosterBoostButton.showButtonText = true;
-            SpeedBoosterBoostButton.HasEffect = true;
+            )
+            {
+                buttonText = ModTranslation.getString("SpeedBoosterBoostButtonName"),
+                showButtonText = true,
+                HasEffect = true
+            };
 
             EvilSpeedBoosterBoostButton = new Buttons.CustomButton(
                 () =>
@@ -790,10 +798,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            EvilSpeedBoosterBoostButton.buttonText = ModTranslation.getString("EvilSpeedBoosterBoostButtonName");
-            EvilSpeedBoosterBoostButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("EvilSpeedBoosterBoostButtonName"),
+                showButtonText = true
+            };
 
             LighterLightOnButton = new Buttons.CustomButton(
                 () =>
@@ -819,10 +828,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            LighterLightOnButton.buttonText = ModTranslation.getString("LighterButtonName");
-            LighterLightOnButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("LighterButtonName"),
+                showButtonText = true
+            };
 
             ImpostorSidekickButton = new CustomButton(
                 () =>
@@ -850,10 +860,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            ImpostorSidekickButton.buttonText = ModTranslation.getString("SidekickName");
-            ImpostorSidekickButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("SidekickName"),
+                showButtonText = true
+            };
 
             SideKillerSidekickButton = new CustomButton(
                 () =>
@@ -862,10 +873,10 @@ namespace SuperNewRoles.Buttons
                     if (target && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.CanMove && !RoleClass.SideKiller.IsCreateMadKiller)
                     {
                         MessageWriter writer = RPCHelper.StartRPC(CustomRPC.CustomRPC.SetMadKiller);
-                        writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                        writer.Write(CachedPlayer.LocalPlayer.PlayerId);
                         writer.Write(target.PlayerId);
                         writer.EndRPC();
-                        RPCProcedure.SetMadKiller(PlayerControl.LocalPlayer.PlayerId, target.PlayerId);
+                        RPCProcedure.SetMadKiller(CachedPlayer.LocalPlayer.PlayerId, target.PlayerId);
                         RoleClass.SideKiller.IsCreateMadKiller = true;
                         PlayerControl.LocalPlayer.killTimer = RoleClass.SideKiller.KillCoolTime;
                     }
@@ -886,10 +897,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            SideKillerSidekickButton.buttonText = ModTranslation.getString("SidekickName");
-            SideKillerSidekickButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("SidekickName"),
+                showButtonText = true
+            };
 
             MadMakerSidekickButton = new CustomButton(
                 () =>
@@ -918,13 +930,13 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
+            )
+            {
+                buttonText = ModTranslation.getString("SidekickName"),
+                showButtonText = true
+            };
 
-            MadMakerSidekickButton.buttonText = ModTranslation.getString("SidekickName");
-            MadMakerSidekickButton.showButtonText = true;
-
-
-            RoleClass.SerialKiller.SuicideKillText = GameObject.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.KillButton.cooldownTimerText.transform.parent);
+            RoleClass.SerialKiller.SuicideKillText = GameObject.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText.transform.parent);
             RoleClass.SerialKiller.SuicideKillText.text = "";
             RoleClass.SerialKiller.SuicideKillText.enableWordWrapping = false;
             RoleClass.SerialKiller.SuicideKillText.transform.localScale = Vector3.one * 0.5f;
@@ -933,7 +945,6 @@ namespace SuperNewRoles.Buttons
             DemonButton = new CustomButton(
                 () =>
                 {
-
                     Demon.DemonCurse(setTarget(untarget: Demon.GetUntarget()));
                     DemonButton.Timer = DemonButton.MaxTimer;
                 },
@@ -953,10 +964,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            DemonButton.buttonText = ModTranslation.getString("DemonButtonName");
-            DemonButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("DemonButtonName"),
+                showButtonText = true
+            };
 
             ArsonistDouseButton = new CustomButton(
                 () =>
@@ -985,10 +997,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.Q,
                 49
-            );
-
-            ArsonistDouseButton.buttonText = ModTranslation.getString("ArsonistDouseButtonName");
-            ArsonistDouseButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("ArsonistDouseButtonName"),
+                showButtonText = true
+            };
 
             ArsonistIgniteButton = new CustomButton(
                 () =>
@@ -996,12 +1009,11 @@ namespace SuperNewRoles.Buttons
                     Arsonist.SetWinArsonist();
                     RoleClass.Arsonist.TriggerArsonistWin = true;
                     AdditionalTempData.winCondition = EndGame.WinCondition.ArsonistWin;
-                    RPCProcedure.ShareWinner(PlayerControl.LocalPlayer.PlayerId);
-
-                    MessageWriter Writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.ShareWinner, SendOption.Reliable, -1);
-                    Writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                    RPCProcedure.ShareWinner(CachedPlayer.LocalPlayer.PlayerId);
+                    MessageWriter Writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.ShareWinner, SendOption.Reliable, -1);
+                    Writer.Write(CachedPlayer.LocalPlayer.PlayerId);
                     AmongUsClient.Instance.FinishRpcImmediately(Writer);
-                    
+
                     Writer = RPCHelper.StartRPC(CustomRPC.CustomRPC.SetWinCond);
                     Writer.Write((byte)CustomGameOverReason.ArsonistWin);
                     Writer.EndRPC();
@@ -1015,7 +1027,7 @@ namespace SuperNewRoles.Buttons
                     }
                     else
                     {
-                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CustomEndGame, SendOption.Reliable, -1);
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CustomEndGame, SendOption.Reliable, -1);
                         writer.Write((byte)reason);
                         writer.Write(false);
                         AmongUsClient.Instance.FinishRpcImmediately(writer);
@@ -1041,10 +1053,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            ArsonistIgniteButton.buttonText = ModTranslation.getString("ArsonistIgniteButtonName");
-            ArsonistIgniteButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("ArsonistIgniteButtonName"),
+                showButtonText = true
+            };
 
             SpeederButton = new CustomButton(
                 () =>
@@ -1067,45 +1080,45 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-
-            SpeederButton.buttonText = ModTranslation.getString("SpeederButtonName");
-            SpeederButton.showButtonText = true;
-            SpeederButton.HasEffect = true;
-
+            )
+            {
+                buttonText = ModTranslation.getString("SpeederButtonName"),
+                showButtonText = true,
+                HasEffect = true
+            };
 
             ChiefSidekickButton = new CustomButton(
-               () =>
-               {
-                   var target = setTarget();
-                   if (!target.Data.Role.IsImpostor && target && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.CanMove && !RoleClass.Chief.IsCreateSheriff)
-                   {
-                       target.RpcSetRole(RoleTypes.Crewmate);
-                       target.setRoleRPC(RoleId.Sheriff);
-                       RoleClass.Chief.IsCreateSheriff = true;
-                   }
-                   else if (target.Data.Role.IsImpostor)
-                   {
-                       PlayerControl.LocalPlayer.RpcMurderPlayer(PlayerControl.LocalPlayer);
-                   }
-               },
-               () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(RoleId.Chief) && ModeHandler.isMode(ModeId.Default) && !RoleClass.Chief.IsCreateSheriff; },
-               () =>
-               {
-                   return setTarget() && PlayerControl.LocalPlayer.CanMove;
-               },
-               () => { },
-               RoleClass.Chief.getButtonSprite(),
-               new Vector3(-1.8f, -0.06f, 0),
-               __instance,
-               __instance.AbilityButton,
-               KeyCode.F,
-               49
-           );
-
-            ChiefSidekickButton.buttonText = ModTranslation.getString("SidekickName");
-            ChiefSidekickButton.showButtonText = true;
+                () =>
+                {
+                    var target = setTarget();
+                    if (!target.Data.Role.IsImpostor && target && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.CanMove && !RoleClass.Chief.IsCreateSheriff)
+                    {
+                        target.RPCSetRoleUnchecked(RoleTypes.Crewmate);
+                        target.setRoleRPC(RoleId.Sheriff);
+                        RoleClass.Chief.IsCreateSheriff = true;
+                    }
+                    else if (target.Data.Role.IsImpostor)
+                    {
+                        PlayerControl.LocalPlayer.RpcMurderPlayer(PlayerControl.LocalPlayer);
+                    }
+                },
+                () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(RoleId.Chief) && ModeHandler.isMode(ModeId.Default) && !RoleClass.Chief.IsCreateSheriff; },
+                () =>
+                {
+                    return setTarget() && PlayerControl.LocalPlayer.CanMove;
+                },
+                () => { },
+                RoleClass.Chief.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            )
+            {
+                buttonText = ModTranslation.getString("SidekickName"),
+                showButtonText = true
+            };
 
             VultureButton = new CustomButton(
                 () =>
@@ -1123,7 +1136,7 @@ namespace SuperNewRoles.Buttons
                                 {
                                     GameData.PlayerInfo playerInfo = GameData.Instance.GetPlayerById(component.ParentId);
 
-                                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CleanBody, Hazel.SendOption.Reliable, -1);
+                                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CleanBody, Hazel.SendOption.Reliable, -1);
                                     writer.Write(playerInfo.PlayerId);
                                     AmongUsClient.Instance.FinishRpcImmediately(writer);
                                     RPCProcedure.CleanBody(playerInfo.PlayerId);
@@ -1132,17 +1145,14 @@ namespace SuperNewRoles.Buttons
                                     VultureButton.Timer = VultureButton.MaxTimer;
                                     break;
                                 }
-
                             }
-
                         }
                     }
                     if (RoleClass.Vulture.DeadBodyCount < 0)
                     {
-                        CustomRPC.RPCProcedure.ShareWinner(PlayerControl.LocalPlayer.PlayerId);
-
-                        MessageWriter Writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.ShareWinner, SendOption.Reliable, -1);
-                        Writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                        CustomRPC.RPCProcedure.ShareWinner(CachedPlayer.LocalPlayer.PlayerId);
+                        MessageWriter Writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.ShareWinner, SendOption.Reliable, -1);
+                        Writer.Write(CachedPlayer.LocalPlayer.PlayerId);
                         AmongUsClient.Instance.FinishRpcImmediately(Writer);
                         if (AmongUsClient.Instance.AmHost)
                         {
@@ -1150,7 +1160,7 @@ namespace SuperNewRoles.Buttons
                         }
                         else
                         {
-                            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CustomEndGame, SendOption.Reliable, -1);
+                            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CustomEndGame, SendOption.Reliable, -1);
                             writer.Write((byte)EndGame.CustomGameOverReason.VultureWin);
                             writer.Write(false);
                             AmongUsClient.Instance.FinishRpcImmediately(writer);
@@ -1173,19 +1183,20 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            VultureButton.buttonText = ModTranslation.getString("VultureButtonName");
-            VultureButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("VultureButtonName"),
+                showButtonText = true
+            };
 
             ShielderButton = new CustomButton(
                 () =>
                 {
-                    MessageWriter Writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.SetShielder, SendOption.Reliable, -1);
-                    Writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                    MessageWriter Writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.SetShielder, SendOption.Reliable, -1);
+                    Writer.Write(CachedPlayer.LocalPlayer.PlayerId);
                     Writer.Write(true);
                     AmongUsClient.Instance.FinishRpcImmediately(Writer);
-                    RPCProcedure.SetShielder(PlayerControl.LocalPlayer.PlayerId, true);
+                    RPCProcedure.SetShielder(CachedPlayer.LocalPlayer.PlayerId, true);
                     ShielderButton.actionButton.cooldownTimerText.color = new Color(0F, 0.8F, 0F);
                     ShielderButton.MaxTimer = RoleClass.Shielder.DurationTime;
                     ShielderButton.Timer = ShielderButton.MaxTimer;
@@ -1206,10 +1217,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            ShielderButton.buttonText = ModTranslation.getString("ShielderButtonName");
-            ShielderButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("ShielderButtonName"),
+                showButtonText = true
+            };
 
             CleanerButton = new CustomButton(
                 () =>
@@ -1227,7 +1239,7 @@ namespace SuperNewRoles.Buttons
                                 {
                                     GameData.PlayerInfo playerInfo = GameData.Instance.GetPlayerById(component.ParentId);
 
-                                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CleanBody, Hazel.SendOption.Reliable, -1);
+                                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CleanBody, Hazel.SendOption.Reliable, -1);
                                     writer.Write(playerInfo.PlayerId);
                                     AmongUsClient.Instance.FinishRpcImmediately(writer);
                                     RPCProcedure.CleanBody(playerInfo.PlayerId);
@@ -1241,35 +1253,30 @@ namespace SuperNewRoles.Buttons
                                     break;
                                 }
                             }
-
                         }
                     }
-
                 },
                 () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(RoleId.Cleaner); },
-
                 () =>
                 {
                     return __instance.ReportButton.graphic.color == Palette.EnabledColor && PlayerControl.LocalPlayer.CanMove;
                 },
-
                 () =>
                 {
                     CleanerButton.MaxTimer = RoleClass.Cleaner.CoolTime;
                     CleanerButton.Timer = RoleClass.Cleaner.CoolTime;
                 },
-
-
                 RoleClass.Cleaner.getButtonSprite(),
                 new Vector3(-1.8f, -0.06f, 0),
                 __instance,
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            CleanerButton.buttonText = ModTranslation.getString("CleanerButtonName");
-            CleanerButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("CleanerButtonName"),
+                showButtonText = true
+            };
 
             MadCleanerButton = new CustomButton(
                 () =>
@@ -1287,15 +1294,13 @@ namespace SuperNewRoles.Buttons
                                 {
                                     GameData.PlayerInfo playerInfo = GameData.Instance.GetPlayerById(component.ParentId);
 
-                                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CleanBody, Hazel.SendOption.Reliable, -1);
+                                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.CleanBody, Hazel.SendOption.Reliable, -1);
                                     writer.Write(playerInfo.PlayerId);
                                     AmongUsClient.Instance.FinishRpcImmediately(writer);
                                     RPCProcedure.CleanBody(playerInfo.PlayerId);
                                     break;
                                 }
-
                             }
-
                         }
                     }
                 },
@@ -1315,10 +1320,11 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            MadCleanerButton.buttonText = ModTranslation.getString("CleanerButtonName");
-            MadCleanerButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("CleanerButtonName"),
+                showButtonText = true
+            };
 
             FreezerButton = new Buttons.CustomButton(
                 () =>
@@ -1335,17 +1341,17 @@ namespace SuperNewRoles.Buttons
                 },
                 () => { Freezer.EndMeeting(); },
                 RoleClass.Freezer.GetButtonSprite(),
-
                 new Vector3(-1.8f, -0.06f, 0),
                 __instance,
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            FreezerButton.buttonText = ModTranslation.getString("FreezerButtonName");
-            FreezerButton.showButtonText = true;
-            FreezerButton.HasEffect = true;
+            )
+            {
+                buttonText = ModTranslation.getString("FreezerButtonName"),
+                showButtonText = true,
+                HasEffect = true
+            };
 
             SamuraiButton = new Buttons.CustomButton(
                 () =>
@@ -1356,36 +1362,35 @@ namespace SuperNewRoles.Buttons
                     }
                 },
                 () => { return ModeHandler.isMode(ModeId.Default) && RoleHelpers.isAlive(PlayerControl.LocalPlayer) && Samurai.isSamurai(PlayerControl.LocalPlayer) && !RoleClass.Samurai.Sword; },
-
                 () =>
                 {
                     return PlayerControl.LocalPlayer.CanMove;
                 },
-
                 () => { Samurai.EndMeeting(); },
-                
                 RoleClass.Samurai.GetButtonSprite(),
                 new Vector3(-1.8f, -0.06f, 0),
                 __instance,
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            SamuraiButton.buttonText = ModTranslation.getString("SamuraiButtonName");
-            SamuraiButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("SamuraiButtonName"),
+                showButtonText = true
+            };
 
             VentMakerButton = new CustomButton(
                 () =>
                 {
                     RoleClass.VentMaker.VentCount++;
                     MessageWriter writer = RPCHelper.StartRPC(CustomRPC.CustomRPC.MakeVent);
-                    writer.Write(PlayerControl.LocalPlayer.transform.position.x);
-                    writer.Write(PlayerControl.LocalPlayer.transform.position.y);
-                    writer.Write(PlayerControl.LocalPlayer.transform.position.z);
+                    writer.Write(CachedPlayer.LocalPlayer.transform.position.x);
+                    writer.Write(CachedPlayer.LocalPlayer.transform.position.y);
+                    writer.Write(CachedPlayer.LocalPlayer.transform.position.z);
                     writer.EndRPC();
-                    CustomRPC.RPCProcedure.MakeVent(PlayerControl.LocalPlayer.transform.position.x,PlayerControl.LocalPlayer.transform.position.y,PlayerControl.LocalPlayer.transform.position.z);
-                    GameObject Vent = GameObject.Find("VentMakerVent" + ShipStatus.Instance.AllVents.Select(x => x.Id).Max().ToString());
+                    CustomRPC.RPCProcedure.MakeVent(CachedPlayer.LocalPlayer.transform.position.x, CachedPlayer.LocalPlayer.transform.position.y, CachedPlayer.LocalPlayer.transform.position.z);
+                    GameObject Vent = GameObject.Find("VentMakerVent" + MapUtilities.CachedShipStatus.AllVents.Select(x => x.Id).Max().ToString());
+
                     RoleClass.VentMaker.Vent = Vent.GetComponent<Vent>();
                     if (RoleClass.VentMaker.VentCount == 2) RoleClass.VentMaker.IsMakeVent = false;
                 },
@@ -1401,17 +1406,18 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.F,
                 49
-            );
-
-            VentMakerButton.buttonText = ModTranslation.getString("VentMakerButtonName");
-            VentMakerButton.showButtonText = true;
+            )
+            {
+                buttonText = ModTranslation.getString("VentMakerButtonName"),
+                showButtonText = true
+            };
 
             GhostMechanicRepairButton = new CustomButton(
                 () =>
                 {
                     RoleClass.GhostMechanic.LimitCount--;
 
-                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks)
+                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks.GetFastEnumerator())
                     {
                         if (task.TaskType == TaskTypes.FixLights)
                         {
@@ -1420,26 +1426,26 @@ namespace SuperNewRoles.Buttons
                         }
                         else if (task.TaskType == TaskTypes.RestoreOxy)
                         {
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.LifeSupp, 0 | 64);
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.LifeSupp, 1 | 64);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.LifeSupp, 0 | 64);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.LifeSupp, 1 | 64);
                         }
                         else if (task.TaskType == TaskTypes.ResetReactor)
                         {
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.Reactor, 16);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.Reactor, 16);
                         }
                         else if (task.TaskType == TaskTypes.ResetSeismic)
                         {
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.Laboratory, 16);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.Laboratory, 16);
                         }
                         else if (task.TaskType == TaskTypes.FixComms)
                         {
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.Comms, 16 | 0);
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.Comms, 16 | 1);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.Comms, 16 | 0);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.Comms, 16 | 1);
                         }
                         else if (task.TaskType == TaskTypes.StopCharles)
                         {
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.Reactor, 0 | 16);
-                            ShipStatus.Instance.RpcRepairSystem(SystemTypes.Reactor, 1 | 16);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.Reactor, 0 | 16);
+                            MapUtilities.CachedShipStatus.RpcRepairSystem(SystemTypes.Reactor, 1 | 16);
                         }
                     }
                     if (RoleClass.GhostMechanic.LimitCount <= 0)
@@ -1451,7 +1457,7 @@ namespace SuperNewRoles.Buttons
                 () =>
                 {
                     bool sabotageActive = false;
-                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks)
+                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks.GetFastEnumerator())
                         if (task.TaskType == TaskTypes.FixLights || task.TaskType == TaskTypes.RestoreOxy || task.TaskType == TaskTypes.ResetReactor || task.TaskType == TaskTypes.ResetSeismic || task.TaskType == TaskTypes.FixComms || task.TaskType == TaskTypes.StopCharles
                             || (SubmergedCompatibility.isSubmerged() && task.TaskType == SubmergedCompatibility.RetrieveOxygenMask))
                         {
@@ -1469,44 +1475,42 @@ namespace SuperNewRoles.Buttons
                 KeyCode.F,
                 49
             );
-            
             GhostMechanicNumRepairText = GameObject.Instantiate(GhostMechanicRepairButton.actionButton.cooldownTimerText, GhostMechanicRepairButton.actionButton.cooldownTimerText.transform.parent);
             GhostMechanicNumRepairText.text = "";
             GhostMechanicNumRepairText.enableWordWrapping = false;
             GhostMechanicNumRepairText.transform.localScale = Vector3.one * 0.5f;
             GhostMechanicNumRepairText.transform.localPosition += new Vector3(0f, 0.7f, 0);
-
             GhostMechanicRepairButton.buttonText = ModTranslation.getString("GhostMechanicButtonName");
-            GhostMechanicRepairButton .showButtonText = true;
+            GhostMechanicRepairButton.showButtonText = true;
 
             EvilHackerButton = new CustomButton(
-               () =>
-               {
-                   PlayerControl.LocalPlayer.NetTransform.Halt();
-                   Action<MapBehaviour> tmpAction = (MapBehaviour m) => { m.ShowCountOverlay(); };
-                   DestroyableSingleton<HudManager>.Instance.ShowMap(tmpAction);
-
-               },
-               () => { return PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.EvilHacker) && PlayerControl.LocalPlayer.CanMove; },
-               () =>
-               {
-                   return PlayerControl.LocalPlayer.CanMove;
-               },
+                () =>
+                {
+                    CachedPlayer.LocalPlayer.NetTransform.Halt();
+                    Action<MapBehaviour> tmpAction = (MapBehaviour m) => { m.ShowCountOverlay(); };
+                    FastDestroyableSingleton<HudManager>.Instance.ShowMap(tmpAction);
+                },
+                () => { return PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.EvilHacker) && PlayerControl.LocalPlayer.CanMove; },
+                () =>
+                {
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
                 () =>
                 {
                     EvilHackerButton.MaxTimer = 0f;
                     EvilHackerButton.Timer = 0f;
                 },
-               RoleClass.EvilHacker.getButtonSprite(),
-               new Vector3(-1.8f, -0.06f, 0),
-               __instance,
-               __instance.AbilityButton,
-               KeyCode.F,
-               49
-            );
-
-            EvilHackerButton.buttonText = ModTranslation.getString("ADMINButton");
-            EvilHackerButton.showButtonText = true;
+                RoleClass.EvilHacker.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            )
+            {
+                buttonText = ModTranslation.getString("ADMINButton"),
+                showButtonText = true
+            };
 
             EvilHackerMadmateSetting = new CustomButton(
                 () =>
@@ -1535,15 +1539,58 @@ namespace SuperNewRoles.Buttons
                 __instance.AbilityButton,
                 KeyCode.Q,
                 8
-            );
+            )
+            {
+                buttonText = ModTranslation.getString("SidekickName"),
+                showButtonText = true
+            };
 
-            EvilHackerMadmateSetting.buttonText = ModTranslation.getString("SidekickName");
-            EvilHackerMadmateSetting.showButtonText = true;
+            PositionSwapperButton = new CustomButton(
+                () =>
+                {
+                    RoleClass.PositionSwapper.SwapCount--;
+                    /*if (RoleClass.PositionSwapper.SwapCount >= 1){
+                        PositionSwapperNumText.text = String.Format(ModTranslation.getString("SheriffNumTextName"), RoleClass.PositionSwapper.SwapCount);
+                    }
+                    else{
+                        PositionSwapperNumText.text = "";
+                    }*/
+                    //RoleClass.PositionSwapper.ButtonTimer = DateTime.Now;
+                    PositionSwapperButton.actionButton.cooldownTimerText.color = new Color(255F, 255F, 255F);
+                    PositionSwapper.SwapStart();
+                    PositionSwapper.ResetCoolDown();
+                },
+                () => { return RoleHelpers.isAlive(PlayerControl.LocalPlayer) && PlayerControl.LocalPlayer.isRole(RoleId.PositionSwapper); },
+                () =>
+                {
+                    float swapcount = RoleClass.PositionSwapper.SwapCount;
+                    if (swapcount > 0)
+                        PositionSwapperNumText.text = String.Format(ModTranslation.getString("PositionSwapperNumTextName"), swapcount);
+                    else
+                        PositionSwapperNumText.text = String.Format(ModTranslation.getString("PositionSwapperNumTextName"), "0");
+                    if (!PlayerControl.LocalPlayer.CanMove) return false;
+                    if (RoleClass.PositionSwapper.SwapCount <= 0) return false;
+                    return true && PlayerControl.LocalPlayer.CanMove;
+                },
+                () => { PositionSwapper.EndMeeting(); },
+                RoleClass.PositionSwapper.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49
+            );
+            {
+                PositionSwapperNumText = GameObject.Instantiate(PositionSwapperButton.actionButton.cooldownTimerText, PositionSwapperButton.actionButton.cooldownTimerText.transform.parent);
+                PositionSwapperNumText.text = "";
+                PositionSwapperNumText.enableWordWrapping = false;
+                PositionSwapperNumText.transform.localScale = Vector3.one * 0.5f;
+                PositionSwapperNumText.transform.localPosition += new Vector3(-0.05f, 0.7f, 0);
+                PositionSwapperButton.buttonText = ModTranslation.getString("PositionSwapperButtonName");
+                PositionSwapperButton.showButtonText = true;
+            };
 
             setCustomButtonCooldowns();
-
-
         }
-
     }
 }

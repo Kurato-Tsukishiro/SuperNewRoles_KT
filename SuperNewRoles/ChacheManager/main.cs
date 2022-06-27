@@ -1,7 +1,7 @@
-﻿using SuperNewRoles.CustomRPC;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SuperNewRoles.CustomRPC;
 
 namespace SuperNewRoles
 {
@@ -27,7 +27,7 @@ namespace SuperNewRoles
         }
         public static void ResetQuarreledChache()
         {
-            foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+            foreach (PlayerControl p in CachedPlayer.AllPlayers)
             {
                 if (p.IsQuarreled(false))
                 {
@@ -41,12 +41,13 @@ namespace SuperNewRoles
         }
         public static void ResetLoversChache()
         {
-            foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+            foreach (PlayerControl p in CachedPlayer.AllPlayers)
             {
                 if (p.IsLovers(false))
                 {
                     LoversChache[p.PlayerId] = p.GetOneSideLovers(false);
-                } else
+                }
+                else
                 {
                     LoversChache[p.PlayerId] = null;
                 }
@@ -54,14 +55,14 @@ namespace SuperNewRoles
         }
         public static void ResetMyRoleChache()
         {
-            foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+            foreach (PlayerControl p in CachedPlayer.AllPlayers)
             {
                 MyRoleChache[p.PlayerId] = p.getRole(false);
             }
         }
         public static void ResetMyGhostRoleChache()
         {
-            foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+            foreach (PlayerControl p in CachedPlayer.AllPlayers)
             {
                 MyGhostRoleChache[p.PlayerId] = p.getGhostRole(false);
             }
