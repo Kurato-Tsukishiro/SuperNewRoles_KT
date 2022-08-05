@@ -461,7 +461,7 @@ namespace SuperNewRoles.CustomCosmetics
         //レポURL、レポ
         public static Dictionary<string, string> hatRepos = new()
         {
-            { "https://raw.githubusercontent.com/ykundesu/SuperNewNamePlates/master", "SuperNewNamePlates" },
+            { "https://raw.githubusercontent.com/ykundesu/SuperNewNamePlates/KT/Test", "SuperNewNamePlates" },
 
             { "https://raw.githubusercontent.com/hinakkyu/TheOtherHats/master", "mememurahat" },
             { "https://raw.githubusercontent.com/Ujet222/TOPHats/main", "YJ" },
