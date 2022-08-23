@@ -35,8 +35,10 @@ namespace SuperNewRoles.Roles
             IsMeeting = false;
             IsCoolTimeSetted = false;
             IsStart = false;
+            Agartha.MapData.ClearAndReloads();
             LadderDead.Reset();
             //Map.Data.ClearAndReloads();
+            ElectricPatch.Reset();
             SabotageManager.ClearAndReloads();
             Madmate.CheckedImpostor = new();
             Roles.MadMayor.CheckedImpostor = new();
@@ -173,6 +175,7 @@ namespace SuperNewRoles.Roles
             Painter.ClearAndReload();
             Photographer.ClearAndReload();
             Stefinder.ClearAndReload();
+            Slugger.ClearAndReload();
             //ロールクリア
             Quarreled.ClearAndReload();
             Lovers.ClearAndReload();
@@ -289,7 +292,7 @@ namespace SuperNewRoles.Roles
             public static bool IsNeutralKill;
             public static bool IsLoversKill;
             public static bool IsMadRoleKill;
-            public static bool MadRoleKill;
+            public static bool IsFriendsRoleKill;
             public static float KillMaxCount;
             public static Dictionary<int, int> KillCount;
             public static DateTime ButtonTimer;
@@ -310,7 +313,7 @@ namespace SuperNewRoles.Roles
                 IsNeutralKill = CustomOptions.SheriffNeutralKill.GetBool();
                 IsLoversKill = CustomOptions.SheriffLoversKill.GetBool();
                 IsMadRoleKill = CustomOptions.SheriffMadRoleKill.GetBool();
-                MadRoleKill = CustomOptions.SheriffMadRoleKill.GetBool();
+                IsFriendsRoleKill = CustomOptions.SheriffFriendsRoleKill.GetBool();
                 KillMaxCount = CustomOptions.SheriffKillMaxCount.GetFloat();
                 KillCount = new();
             }
@@ -954,6 +957,14 @@ namespace SuperNewRoles.Roles
             public static List<PlayerControl> DoctorPlayer;
             public static Color32 color = new(102, 102, 255, byte.MaxValue);
             public static bool MyPanelFlag;
+            //100%から減っていく
+            //0%だと使用できない
+            //100%までチャージされると再度使えるようになる
+            public static int Battery;
+            public static float BatteryZeroTime;
+            public static float ChargeTime;
+            public static float UseTime;
+            public static bool IsChargingNow;
             public static Minigame Vital;
             private static Sprite VitalSprite;
             public static Sprite GetVitalsSprite()
@@ -967,6 +978,12 @@ namespace SuperNewRoles.Roles
                 DoctorPlayer = new();
                 MyPanelFlag = false;
                 Vital = null;
+                Battery = 100;
+                ChargeTime = CustomOptions.DoctorChargeTime.GetFloat();
+                UseTime = CustomOptions.DoctorUseTime.GetFloat();
+                BatteryZeroTime = UseTime;
+                IsChargingNow = false;
+                Roles.Doctor.VitalsPatch.ResetData();
             }
         }
         public static class CountChanger
@@ -2992,6 +3009,28 @@ namespace SuperNewRoles.Roles
                 SoloWin = CustomOptions.StefinderSoloWin.GetBool();
                 IsKill = false;
                 IsKillPlayer = new();
+            }
+        }
+        public static class Slugger
+        {
+            public static List<PlayerControl> SluggerPlayer;
+            public static Color32 color = ImpostorRed;
+            public static float CoolTime;
+            public static float ChargeTime;
+            public static bool IsMultiKill;
+            private static Sprite buttonSprite;
+            public static Sprite GetButtonSprite()
+            {
+                if (buttonSprite) return buttonSprite;
+                buttonSprite = ModHelpers.LoadSpriteFromResources("SuperNewRoles.Resources.SluggerButton.png", 115f);
+                return buttonSprite;
+            }
+            public static void ClearAndReload()
+            {
+                SluggerPlayer = new();
+                CoolTime = CustomOptions.SluggerCoolTime.GetFloat();
+                ChargeTime = CustomOptions.SluggerChargeTime.GetFloat();
+                IsMultiKill = CustomOptions.SluggerIsMultiKill.GetBool();
             }
         }
         //新ロールクラス

@@ -1,3 +1,5 @@
+using System;
+using HarmonyLib;
 using TMPro;
 
 namespace SuperNewRoles.Modules
@@ -9,6 +11,8 @@ namespace SuperNewRoles.Modules
 
         public static void StartMeeting(MeetingIntroAnimation __instance)
         {
+            __instance.ProtectedRecently.SetActive(false);
+            SoundManager.Instance.StopSound(__instance.ProtectedRecentlySound);
             //このターンで誰か守った？
             bool AnythingPlayerProcted = false;
             foreach (PlayerControl player in CachedPlayer.AllPlayers)
@@ -24,7 +28,7 @@ namespace SuperNewRoles.Modules
             }
 
             //誰か守ってたら音声あり
-            if (AnythingPlayerProcted || ProctedMessages != null)
+            if (AnythingPlayerProcted || ProctedMessages != "")
             {
                 __instance.ProtectedRecently.SetActive(true);
                 SoundManager.Instance.PlaySound(__instance.ProtectedRecentlySound, false, 1f);
@@ -52,7 +56,7 @@ namespace SuperNewRoles.Modules
         {
             SuperNewRolesPlugin.Logger.LogDebug("守護メッセージがスケジュールされました。:" + Text);
             //もしProctedMessagesが空なら行替えなしに、空じゃなきゃ行替えありに
-            ProctedMessages = ProctedMessages == string.Empty ? Text : string.Concat(ProctedMessages, "\n", Text);
+            ProctedMessages = ProctedMessages == "" ? Text : string.Concat(ProctedMessages, "\n", Text);
         }
     }
 }

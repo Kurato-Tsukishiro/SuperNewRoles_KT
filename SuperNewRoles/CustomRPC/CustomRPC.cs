@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.IL2CPP.Utils;
 using HarmonyLib;
 using Hazel;
 using InnerNet;
+using SuperNewRoles.CustomObject;
 using SuperNewRoles.CustomOption;
 using SuperNewRoles.EndGame;
+using SuperNewRoles.Helpers;
 using SuperNewRoles.Mode;
 using SuperNewRoles.Mode.SuperHostRoles;
 using SuperNewRoles.Patch;
@@ -153,6 +156,7 @@ namespace SuperNewRoles.CustomRPC
         Photographer,
         Stefinder,
         Stefinder1,
+        Slugger,
         //RoleId
     }
 
@@ -224,18 +228,43 @@ namespace SuperNewRoles.CustomRPC
         KunaiKill,
         SetSecretRoomTeleportStatus,
         ChiefSidekick,
+        RpcSetDoorway,
         StartRevolutionMeeting,
         UncheckedUsePlatform,
         BlockReportDeadBody,
         PartTimerSet,
         SetMatryoshkaDeadbody,
+        StefinderIsKilled,
+        PlayPlayerAnimation,
+        SluggerExile,
         PainterPaintSet,
         PainterSetTarget,
         SharePhotograph,
-        StefinderIsKilled
     }
     public static class RPCProcedure
     {
+        public static void SluggerExile(byte SourceId, List<byte> Targets)
+        {
+            Logger.Info("～SluggerExile～");
+            PlayerControl Source = SourceId.GetPlayerControl();
+            if (Source == null) return;
+            Logger.Info("Source突破");
+            foreach (byte target in Targets)
+            {
+                PlayerControl Player = target.GetPlayerControl();
+                Logger.Info($"{target}はnullか:{Player == null}");
+                if (Player == null) continue;
+                Player.Exiled();
+                new SluggerDeadbody().Start(Source.PlayerId, Player.PlayerId, Source.transform.position - Player.transform.position);
+            }
+        }
+        public static void PlayPlayerAnimation(byte playerid, byte type)
+        {
+            RpcAnimationType AnimType = (RpcAnimationType)type;
+            PlayerAnimation PlayerAnim = PlayerAnimation.GetPlayerAnimation(playerid);
+            if (PlayerAnim == null) return;
+            PlayerAnim.HandleAnim(AnimType);
+        }
         public static void PainterSetTarget(byte target, bool Is)
         {
             if (target == CachedPlayer.LocalPlayer.PlayerId) RoleClass.Painter.IsLocalActionSend = Is;
@@ -530,7 +559,6 @@ namespace SuperNewRoles.CustomRPC
         {
             var player = ModHelpers.PlayerById(playerId);
             player.ClearAllTasks();
-
             GameData.Instance.SetTasks(playerId, taskTypeIds);
         }
         public static void StartGameRPC()
@@ -1378,6 +1406,9 @@ namespace SuperNewRoles.CustomRPC
                         case CustomRPC.ChiefSidekick:
                             ChiefSidekick(reader.ReadByte());
                             break;
+                        case CustomRPC.RpcSetDoorway:
+                            RPCHelper.RpcSetDoorway(reader.ReadByte(), reader.ReadBoolean());
+                            break;
                         case CustomRPC.StartRevolutionMeeting:
                             StartRevolutionMeeting(reader.ReadByte());
                             break;
@@ -1404,6 +1435,19 @@ namespace SuperNewRoles.CustomRPC
                             break;
                         case CustomRPC.StefinderIsKilled:
                             StefinderIsKilled(reader.ReadByte());
+                            break;
+                        case CustomRPC.PlayPlayerAnimation:
+                            PlayPlayerAnimation(reader.ReadByte(), reader.ReadByte());
+                            break;
+                        case CustomRPC.SluggerExile:
+                            source = reader.ReadByte();
+                            byte count = reader.ReadByte();
+                            List<byte> Targets = new();
+                            for (int i = 0; i < count; i++)
+                            {
+                                Targets.Add(reader.ReadByte());
+                            }
+                            SluggerExile(source, Targets);
                             break;
                     }
                 }

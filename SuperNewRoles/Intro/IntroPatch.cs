@@ -1,15 +1,34 @@
+using System.Collections;
+using Agartha;
+using BepInEx.IL2CPP.Utils;
 using HarmonyLib;
 using SuperNewRoles.Buttons;
 using SuperNewRoles.CustomRPC;
 using SuperNewRoles.Intro;
 using SuperNewRoles.Mode;
+using SuperNewRoles.Patch;
 using SuperNewRoles.Roles;
 using UnityEngine;
 
 namespace SuperNewRoles.Patches
 {
+    [HarmonyPatch(typeof(Constants), nameof(Constants.ShouldHorseAround))]
+    public static class ShouldAlwaysHorseAround
+    {
+        public static bool isHorseMode;
+        public static bool Prefix(ref bool __result)
+        {
+            if (isHorseMode != HorseModeOption.enableHorseMode && LobbyBehaviour.Instance != null) __result = isHorseMode;
+            else
+            {
+                __result = HorseModeOption.enableHorseMode;
+                isHorseMode = HorseModeOption.enableHorseMode;
+            }
+            return false;
+        }
+    }
     [HarmonyPatch]
-    class IntroPatch
+    public class IntroPatch
     {
         [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
         class IntroCutsceneOnDestroyPatch
@@ -263,8 +282,25 @@ namespace SuperNewRoles.Patches
                 f = Mathf.Clamp01(f);
                 return (byte)(f * 255);
             }
-            public static void Prefix(IntroCutscene __instance)
+            static IEnumerator settask()
             {
+                while (true)
+                {
+                    if (PlayerControl.LocalPlayer == null) yield break;
+                    if (PlayerControl.LocalPlayer.myTasks.Count == (PlayerControl.GameOptions.NumCommonTasks + PlayerControl.GameOptions.NumShortTasks + PlayerControl.GameOptions.NumLongTasks)) yield break;
+                       
+                    yield return null;
+                }
+            }
+            public static void Prefix(IntroCutscene __instance)
+            {/*
+                if (MapData.IsMap(CustomMapNames.Agartha))
+                {
+                    var (commont, shortt, longt) = PlayerControl.LocalPlayer.GetTaskCount();
+                    PlayerControl.LocalPlayer.GenerateAndAssignTasks(commont, shortt, longt);
+                }*/
+
+                //AmongUsClient.Instance.StartCoroutine(settask());
                 new LateTask(() =>
                 {
                     CustomButton.MeetingEndedUpdate();
@@ -324,20 +360,5 @@ namespace SuperNewRoles.Patches
             }
         }
 
-        [HarmonyPatch(typeof(Constants), nameof(Constants.ShouldHorseAround))]
-        public static class ShouldAlwaysHorseAround
-        {
-            public static bool isHorseMode;
-            public static bool Prefix(ref bool __result)
-            {
-                if (isHorseMode != HorseModeOption.enableHorseMode && LobbyBehaviour.Instance != null) __result = isHorseMode;
-                else
-                {
-                    __result = HorseModeOption.enableHorseMode;
-                    isHorseMode = HorseModeOption.enableHorseMode;
-                }
-                return false;
-            }
-        }
     }
 }

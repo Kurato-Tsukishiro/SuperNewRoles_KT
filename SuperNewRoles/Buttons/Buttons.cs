@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Agartha;
 using HarmonyLib;
 using Hazel;
+using SuperNewRoles.CustomObject;
 using SuperNewRoles.CustomRPC;
 using SuperNewRoles.EndGame;
 using SuperNewRoles.Helpers;
@@ -77,6 +79,7 @@ namespace SuperNewRoles.Buttons
         public static CustomButton PainterButton;
         public static CustomButton PhotographerButton;
         public static CustomButton StefinderKillButton;
+        public static CustomButton SluggerButton;
 
         public static TMPro.TMP_Text sheriffNumShotsText;
         public static TMPro.TMP_Text GhostMechanicNumRepairText;
@@ -99,6 +102,83 @@ namespace SuperNewRoles.Buttons
 
         public static void Postfix(HudManager __instance)
         {
+            SluggerButton = new(
+                () =>
+                {
+                    var anim = PlayerAnimation.GetPlayerAnimation(CachedPlayer.LocalPlayer.PlayerId);
+                    anim.RpcAnimation(RpcAnimationType.SluggerCharge);
+                },
+                (bool isAlive, RoleId role) => { return isAlive && role == RoleId.Slugger; },
+                () =>
+                {
+                    if (SluggerButton.isEffectActive && !PlayerControl.LocalPlayer.CanMove)
+                    {
+                        var anim = PlayerAnimation.GetPlayerAnimation(CachedPlayer.LocalPlayer.PlayerId);
+                        SluggerButton.isEffectActive = false;
+                        anim.RpcAnimation(RpcAnimationType.Stop);
+                    }
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
+                () =>
+                {
+                    SluggerButton.MaxTimer = RoleClass.Slugger.CoolTime;
+                    SluggerButton.Timer = SluggerButton.MaxTimer;
+                    SluggerButton.effectCancellable = false;
+                    SluggerButton.EffectDuration = RoleClass.Slugger.ChargeTime;
+                    SluggerButton.HasEffect = true;
+                },
+                RoleClass.Slugger.GetButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                __instance.AbilityButton,
+                KeyCode.F,
+                49,
+                () => { return false; },
+                true,
+                5f,
+                () =>
+                {
+                    List<PlayerControl> Targets = new();
+                    //一気にキルできるか。後に設定で変更可に
+                    if (RoleClass.Slugger.IsMultiKill)
+                    {
+                        Targets = Roles.Impostor.Slugger.SetTarget();
+                    }
+                    else
+                    {
+                        if (FastDestroyableSingleton<HudManager>.Instance.KillButton.currentTarget != null) Targets.Add(FastDestroyableSingleton<HudManager>.Instance.KillButton.currentTarget);
+                    }
+                    RpcAnimationType AnimationType = RpcAnimationType.SluggerMurder;
+                    //空振り判定
+                    if (Targets.Count <= 0)
+                    {
+                        AnimationType = RpcAnimationType.SluggerMurder;
+                    }
+                    var anim = PlayerAnimation.GetPlayerAnimation(CachedPlayer.LocalPlayer.PlayerId);
+                    anim.RpcAnimation(AnimationType);
+                    MessageWriter RPCWriter = RPCHelper.StartRPC(CustomRPC.CustomRPC.SluggerExile);
+                    RPCWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
+                    RPCWriter.Write((byte)Targets.Count);
+                    foreach (PlayerControl Target in Targets)
+                    {
+                        RPCWriter.Write(Target.PlayerId);
+                    }
+                    RPCWriter.EndRPC();
+                    List<byte> TargetsId = new();
+                    foreach (PlayerControl Target in Targets)
+                    {
+                        TargetsId.Add(Target.PlayerId);
+                    }
+                    RPCProcedure.SluggerExile(CachedPlayer.LocalPlayer.PlayerId, TargetsId);
+                    SluggerButton.MaxTimer = RoleClass.Slugger.CoolTime;
+                    SluggerButton.Timer = SluggerButton.MaxTimer;
+                }
+            )
+            {
+                buttonText = ModTranslation.GetString("SluggerButtonName"),
+                showButtonText = true
+            };
+
 
             PhotographerButton = new(
                 () =>
@@ -136,7 +216,7 @@ namespace SuperNewRoles.Buttons
                 KeyCode.F,
                 49,
                 () => { return false; }
-            )
+                )
             {
                 buttonText = ModTranslation.GetString("PhotographerButtonName"),
                 showButtonText = true
@@ -482,17 +562,41 @@ namespace SuperNewRoles.Buttons
                     if (RoleClass.Doctor.Vital == null)
                     {
                         var e = UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"));
-                        if (e == null || Camera.main == null) return;
+                        if (Camera.main == null) return;
+                        if (e == null)
+                        {
+                            e = MapLoader.Airship.AllConsoles.FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"))?.TryCast<SystemConsole>();
+                            if (e == null) return;
+                        }
                         RoleClass.Doctor.Vital = UnityEngine.Object.Instantiate(e.MinigamePrefab, Camera.main.transform, false);
                     }
                     RoleClass.Doctor.Vital.transform.SetParent(Camera.main.transform, false);
                     RoleClass.Doctor.Vital.transform.localPosition = new Vector3(0.0f, 0.0f, -50f);
                     RoleClass.Doctor.Vital.Begin(null);
+                    RoleClass.Doctor.MyPanelFlag = true;
                 },
                 (bool isAlive, RoleId role) => { return role == RoleId.Doctor && isAlive; },
                 () =>
                 {
-                    return PlayerControl.LocalPlayer.CanMove;
+                    if (RoleClass.Doctor.IsChargingNow)
+                    {
+                        DoctorVitalsButton.MaxTimer = 10f;
+                        Logger.Info(RoleClass.Doctor.Battery.ToString());
+                        if (RoleClass.Doctor.Battery <= 0)
+                        {
+                            DoctorVitalsButton.Timer = 10f;
+                        }
+                        else
+                        {
+                            DoctorVitalsButton.Timer =(RoleClass.Doctor.Battery / 10f);
+                        }
+                    }
+                     else if (RoleClass.Doctor.Battery > 0)
+                    {
+                        DoctorVitalsButton.MaxTimer = 0f;
+                        DoctorVitalsButton.Timer = 0f;
+                    }
+                    return (PlayerControl.LocalPlayer.CanMove && RoleClass.Doctor.Battery > 0) || (RoleClass.Doctor.IsChargingNow);
                 },
                 () =>
                 {
@@ -1577,7 +1681,7 @@ namespace SuperNewRoles.Buttons
                 {
                     RoleClass.GhostMechanic.LimitCount--;
 
-                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks.GetFastEnumerator())
+                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks)
                     {
                         if (task.TaskType == TaskTypes.FixLights)
                         {
@@ -1617,7 +1721,7 @@ namespace SuperNewRoles.Buttons
                 () =>
                 {
                     bool sabotageActive = false;
-                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks.GetFastEnumerator())
+                    foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks)
                         if (task.TaskType == TaskTypes.FixLights || task.TaskType == TaskTypes.RestoreOxy || task.TaskType == TaskTypes.ResetReactor || task.TaskType == TaskTypes.ResetSeismic || task.TaskType == TaskTypes.FixComms || task.TaskType == TaskTypes.StopCharles
                             || (SubmergedCompatibility.isSubmerged() && task.TaskType == SubmergedCompatibility.RetrieveOxygenMask))
                         {
@@ -2061,7 +2165,7 @@ namespace SuperNewRoles.Buttons
                         RoleClass.NiceButtoner.SkillCount--;
                     }
                 },
-                (bool isAlive, RoleId role) => { return isAlive && (role == RoleId.EvilButtoner || role == RoleId.NiceButtoner) && ModeHandler.IsMode(ModeId.Default); },
+                (bool isAlive, RoleId role) => { return isAlive && (role == RoleId.EvilButtoner || role == RoleId.NiceButtoner); },
                 () =>
                 {
                     return ((PlayerControl.LocalPlayer.IsRole(RoleId.NiceButtoner) && RoleClass.NiceButtoner.SkillCount != 0) ||
@@ -2341,7 +2445,27 @@ namespace SuperNewRoles.Buttons
                             PsychometristButton.isEffectActive = false;
                         }
                     }
-                    return __instance.ReportButton.graphic.color == Palette.EnabledColor && PlayerControl.LocalPlayer.CanMove;
+                    bool Is = __instance.ReportButton.graphic.color == Palette.EnabledColor && PlayerControl.LocalPlayer.CanMove;
+                    if (!Is) return false;
+                    Is = false;
+                    foreach (Collider2D collider2D in Physics2D.OverlapCircleAll(PlayerControl.LocalPlayer.GetTruePosition(), PlayerControl.LocalPlayer.MaxReportDistance, Constants.PlayersOnlyMask))
+                    {
+                        if (collider2D.tag == "DeadBody")
+                        {
+                            DeadBody component = collider2D.GetComponent<DeadBody>();
+                            if (component && !component.Reported)
+                            {
+                                Vector2 truePosition = PlayerControl.LocalPlayer.GetTruePosition();
+                                Vector2 truePosition2 = component.TruePosition;
+                                if (Vector2.Distance(truePosition2 - new Vector2(0.15f, 0.2f), truePosition) <= RoleClass.Psychometrist.Distance && PlayerControl.LocalPlayer.CanMove && !PhysicsHelpers.AnythingBetween(truePosition, truePosition2, Constants.ShipAndObjectsMask, false))
+                                {
+                                    Is = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    return Is;
                 },
                 () =>
                 {

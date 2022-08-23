@@ -28,7 +28,7 @@ namespace SuperNewRoles
         }
 
         public static Version Version = Version.Parse(VersionString);
-        internal static BepInEx.Logging.ManualLogSource Logger;
+        public static BepInEx.Logging.ManualLogSource Logger;
         public static Sprite ModStamp;
         public static int optionsPage = 1;
         public Harmony Harmony { get; } = new Harmony(Id);
@@ -74,6 +74,16 @@ namespace SuperNewRoles
             StringDATE = new Dictionary<string, Dictionary<int, string>>();
             Harmony.PatchAll();
             SubmergedCompatibility.Initialize();
+
+            assembly = Assembly.GetExecutingAssembly();
+            string[] resourceNames = assembly.GetManifestResourceNames();
+            foreach (string resourceName in resourceNames)
+            {
+                if (resourceName.EndsWith(".png"))
+                {
+                    ModHelpers.LoadSpriteFromResources(resourceName, 115f);
+                }
+            }
         }
         /*
         [HarmonyPatch(typeof(TranslationController), nameof(TranslationController.GetString), new Type[] { typeof(StringNames), typeof(Il2CppReferenceArray<Il2CppSystem.Object>) })]
