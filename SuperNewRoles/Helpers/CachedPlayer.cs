@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using InnerNet;
+using SuperNewRoles.CustomObject;
 using UnityEngine;
 
 namespace SuperNewRoles
@@ -22,7 +22,6 @@ namespace SuperNewRoles
         public GameData.PlayerInfo Data;
         public byte PlayerId;
         public uint NetId;
-        public int clientId;
 
         public static implicit operator bool(CachedPlayer player)
         {
@@ -80,15 +79,14 @@ namespace SuperNewRoles
             CachedPlayer.AllPlayers.Add(player);
             CachedPlayer.PlayerPtrs[__instance.Pointer] = player;
 
-#if DEBUG
-            foreach (var cachedPlayer in CachedPlayer.AllPlayers)
+            foreach (var cachedPlayer in CachedPlayer.AllPlayers.ToArray())
             {
                 if (!cachedPlayer.PlayerControl || !cachedPlayer.PlayerPhysics || !cachedPlayer.NetTransform || !cachedPlayer.transform)
                 {
-                    SuperNewRolesPlugin.Logger.LogError("CachedPlayer {cachedPlayer.PlayerControl.name} has null fields");
+                    SuperNewRolesPlugin.Logger.LogError($"CachedPlayer {cachedPlayer.PlayerControl?.name} has null fields");
+                    CachedPlayer.AllPlayers.Remove(cachedPlayer);
                 }
             }
-#endif
         }
 
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.OnDestroy))]
@@ -98,6 +96,7 @@ namespace SuperNewRoles
             if (__instance.notRealPlayer) return;
             CachedPlayer.AllPlayers.RemoveAll(p => p.PlayerControl.Pointer == __instance.Pointer);
             CachedPlayer.PlayerPtrs.Remove(__instance.Pointer);
+            PlayerAnimation.GetPlayerAnimation(__instance.PlayerId).OnDestroy();
         }
 
         [HarmonyPatch(typeof(GameData), nameof(GameData.Deserialize))]
@@ -109,7 +108,6 @@ namespace SuperNewRoles
                 cachedPlayer.Data = cachedPlayer.PlayerControl.Data;
                 cachedPlayer.PlayerId = cachedPlayer.PlayerControl.PlayerId;
                 cachedPlayer.NetId = cachedPlayer.PlayerControl.NetId;
-                new LateTask(() => cachedPlayer.clientId = cachedPlayer.PlayerControl.getClientId(), 0.1f);
             }
         }
 
@@ -122,7 +120,6 @@ namespace SuperNewRoles
                 cachedPlayer.Data = cachedPlayer.PlayerControl.Data;
                 cachedPlayer.PlayerId = cachedPlayer.PlayerControl.PlayerId;
                 cachedPlayer.NetId = cachedPlayer.PlayerControl.NetId;
-                new LateTask(()=>cachedPlayer.clientId = cachedPlayer.PlayerControl.getClientId(),0.1f);
             }
         }
 
@@ -132,7 +129,6 @@ namespace SuperNewRoles
         {
             CachedPlayer.PlayerPtrs[__instance.Pointer].PlayerId = __instance.PlayerId;
             CachedPlayer.PlayerPtrs[__instance.Pointer].NetId = __instance.NetId;
-            new LateTask(() => CachedPlayer.PlayerPtrs[__instance.Pointer].clientId = __instance.getClientId(),0.1f);
         }
     }
 }

@@ -1,12 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
@@ -45,7 +42,7 @@ namespace SuperNewRoles.CustomCosmetics
             FetchHats("https://raw.githubusercontent.com/Ujet222/TOPVisors/main", true);
             running = true;
         }
-        private static string sanitizeResourcePath(string res)
+        private static string SanitizeResourcePath(string res)
         {
             if (res == null || !res.EndsWith(".png"))
                 return null;
@@ -56,7 +53,7 @@ namespace SuperNewRoles.CustomCosmetics
                     .Replace("..", "");
             return res;
         }
-        private static bool doesResourceRequireDownload(string respath, string reshash, MD5 md5)
+        private static bool DoesResourceRequireDownload(string respath, string reshash, MD5 md5)
         {
             if (reshash == null || !File.Exists(respath))
                 return true;
@@ -109,7 +106,7 @@ namespace SuperNewRoles.CustomCosmetics
                         CustomVisors.CustomVisor info = new()
                         {
                             name = current["name"]?.ToString(),
-                            resource = sanitizeResourcePath(current["resource"]?.ToString())
+                            resource = SanitizeResourcePath(current["resource"]?.ToString())
                         };
                         if (info.resource == null || info.name == null) // required
                             continue;
@@ -126,7 +123,7 @@ namespace SuperNewRoles.CustomCosmetics
                 MD5 md5 = MD5.Create();
                 foreach (CustomVisors.CustomVisor data in Visordatas)
                 {
-                    if (doesResourceRequireDownload(filePath + data.resource, data.reshasha, md5))
+                    if (DoesResourceRequireDownload(filePath + data.resource, data.reshasha, md5))
                         markedfordownload.Add(data.resource);
                 }
 

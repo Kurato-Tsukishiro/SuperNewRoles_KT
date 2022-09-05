@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using SuperNewRoles.Patch;
 using UnityEngine;
 
@@ -21,8 +20,10 @@ namespace SuperNewRoles.EndGame
                 FinalStatuses = new Dictionary<int, FinalStatus>();
             }
         }
+        public static string GetStatusText(FinalStatus status) => ModTranslation.GetString("FinalStatus" + status.ToString()); //ローカル関数
+
     }
-    enum FinalStatus
+    public enum FinalStatus
     {
         Alive,
         Kill,

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Hazel;
 using SuperNewRoles.Helpers;
@@ -15,7 +14,7 @@ namespace SuperNewRoles
             {
                 if (player == null) return false;
                 if (player.Data.Disconnected) return false;
-                foreach (PlayerControl p in BotManager.AllBots)
+                foreach (PlayerControl p in AllBots)
                 {
                     if (p.PlayerId == player.PlayerId) return true;
                 }
@@ -30,7 +29,7 @@ namespace SuperNewRoles
         {
             return !IsBot(player);
         }
-        public static PlayerControl Spawn(string name = "Bot", byte BotPlayerId = 1)
+        public static PlayerControl Spawn(string name = "Bot")
         {
             byte id = 0;
             foreach (PlayerControl p in CachedPlayer.AllPlayers)
@@ -40,7 +39,7 @@ namespace SuperNewRoles
                     id = p.PlayerId;
                 }
             }
-            var Bot = UnityEngine.Object.Instantiate(AmongUsClient.Instance.PlayerPrefab);
+            var Bot = Object.Instantiate(AmongUsClient.Instance.PlayerPrefab);
 
             id++;
             /*

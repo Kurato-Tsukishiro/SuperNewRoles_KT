@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Hazel;
 using InnerNet;
 
@@ -12,7 +9,7 @@ namespace SuperNewRoles.Helpers
         {
             PlayerControl SeePlayer = see;
             if (see == null) SeePlayer = source;
-            MessageWriter MurderWriter = AmongUsClient.Instance.StartRpcImmediately(source.NetId, (byte)RpcCalls.MurderPlayer, SendOption.Reliable, SeePlayer.getClientId());
+            MessageWriter MurderWriter = AmongUsClient.Instance.StartRpcImmediately(source.NetId, (byte)RpcCalls.MurderPlayer, SendOption.Reliable, SeePlayer.GetClientId());
             MessageExtensions.WriteNetObject(MurderWriter, target);
             AmongUsClient.Instance.FinishRpcImmediately(MurderWriter);
         }
@@ -20,9 +17,11 @@ namespace SuperNewRoles.Helpers
         {
             PlayerControl SeePlayer = see;
             if (see == null) SeePlayer = source;
-            sender.StartRpc(source.NetId, RpcCalls.MurderPlayer, SeePlayer.getClientId())
+            sender.StartMessage(SeePlayer.GetClientId())
+                .StartRpc(source.NetId, RpcCalls.MurderPlayer)
                 .WriteNetObject(target)
-                .EndRpc();
+                .EndRpc()
+                .EndMessage();
         }
     }
 }

@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Assets.CoreScripts;
 using HarmonyLib;
 using Hazel;
 using InnerNet;
+using SuperNewRoles.CustomRPC;
 
 namespace SuperNewRoles.Helpers
 {
@@ -49,10 +48,11 @@ namespace SuperNewRoles.Helpers
             {
                 if (AmongUsClient.Instance.AmClient)
                 {
-                    __instance.SetVisor(visorId);
+                    __instance.SetVisor(visorId, __instance.Data.DefaultOutfit.ColorId);
                 }
                 MessageWriter obj = AmongUsClient.Instance.StartRpc(__instance.NetId, 42, SendOption.None);
                 obj.Write(visorId);
+                obj.Write(__instance.Data.DefaultOutfit.ColorId);
                 obj.EndMessage();
                 return false;
             }
@@ -86,6 +86,24 @@ namespace SuperNewRoles.Helpers
                 val.Write(shouldAnimate);
                 AmongUsClient.Instance.FinishRpcImmediately(val);
                 return false;
+            }
+        }
+        [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcMurderPlayer))]
+        class RpcMurderPlayer
+        {
+            public static bool Prefix(PlayerControl __instance, PlayerControl target)
+            {
+                if (!AmongUsClient.Instance.AmHost)
+                {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.CustomRPC.RPCMurderPlayer, SendOption.Reliable, -1);
+                    writer.Write(__instance.PlayerId);
+                    writer.Write(target.PlayerId);
+                    writer.Write(byte.MaxValue);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.RPCMurderPlayer(__instance.PlayerId, target.PlayerId, byte.MaxValue);
+                    return false;
+                }
+                return true;
             }
         }
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSendChat))]

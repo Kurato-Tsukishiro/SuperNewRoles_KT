@@ -9,25 +9,26 @@ using SuperNewRoles.Intro;
 using SuperNewRoles.Mode.SuperHostRoles;
 using SuperNewRoles.Roles;
 using UnityEngine;
+using static System.String;
 
 namespace SuperNewRoles.Patch
 {
     [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoSpawnPlayer))]
     public class AmongUsClientOnPlayerJoinedPatch
     {
-        public static void Postfix(PlayerPhysics __instance, LobbyBehaviour lobby)
+        public static void Postfix(PlayerPhysics __instance)
         {
             if (AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameMode != GameModes.FreePlay)
             {
                 string text =
-                    ModTranslation.getString("WelcomeMessage1") + "\n" +
-                    ModTranslation.getString("WelcomeMessage2") + "\n" +
-                    ModTranslation.getString("WelcomeMessage3") + "\n" +
-                    ModTranslation.getString("WelcomeMessage4") + "\n" +
-                    ModTranslation.getString("WelcomeMessage5") + "\n" +
-                    ModTranslation.getString("WelcomeMessage6") + "\n" +
-                    ModTranslation.getString("WelcomeMessage7") + "\n" +
-                    ModTranslation.getString("WelcomeMessage8") +
+                    ModTranslation.GetString("WelcomeMessage1") + "\n" +
+                    ModTranslation.GetString("WelcomeMessage2") + "\n" +
+                    ModTranslation.GetString("WelcomeMessage3") + "\n" +
+                    ModTranslation.GetString("WelcomeMessage4") + "\n" +
+                    ModTranslation.GetString("WelcomeMessage5") + "\n" +
+                    ModTranslation.GetString("WelcomeMessage6") + "\n" +
+                    ModTranslation.GetString("WelcomeMessage7") + "\n" +
+                    ModTranslation.GetString("WelcomeMessage8") +
                     " " + "\n.";
                 new LateTask(() =>
                 {
@@ -44,24 +45,31 @@ namespace SuperNewRoles.Patch
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
     class AddChatPatch
     {
-        static string SNR = "<color=#ffa500>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>";
-        static string SNRCommander = "<size=200%>" + SNR + "</size>";
+        static readonly string SNR = "<color=#ffa500>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>";
+        static readonly string SNRCommander = "<size=200%>" + SNR + "</size>";
         public static string WelcomeToSuperNewRoles = "<size=150%>Welcome To " + SNR + "</size>";
 
-        public static void Postfix(PlayerControl sourcePlayer, string chatText)
+        public static bool Prefix(PlayerControl sourcePlayer, string chatText)
         {
-            if (!AmongUsClient.Instance.AmHost) return;
-
             if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
             {
-                Assassin.AddChat(sourcePlayer, chatText);
+                if (AmongUsClient.Instance.AmHost)
+                {
+                    Assassin.AddChat(sourcePlayer, chatText);
+                }
             }
 
             var Commands = chatText.Split(" ");
             if (Commands[0].Equals("/version", StringComparison.OrdinalIgnoreCase) ||
                 Commands[0].Equals("/v", StringComparison.OrdinalIgnoreCase))
             {
-                SendCommand(sourcePlayer, " SuperNewRoles v" + SuperNewRolesPlugin.VersionString + "\nCreate by ykundesu");
+                string betatext = "";
+                if (SuperNewRolesPlugin.IsBeta)
+                {
+                    betatext = "\nベータ版です！バグには注意してください！";
+                }
+                SendCommand(sourcePlayer, " SuperNewRoles v" + SuperNewRolesPlugin.VersionString + "\nCreate by ykundesu" + betatext);
+                return false;
             }
             else if (
                 Commands[0].Equals("/Commands", StringComparison.OrdinalIgnoreCase) ||
@@ -69,31 +77,34 @@ namespace SuperNewRoles.Patch
                 )
             {
                 string text =
-                    ModTranslation.getString("CommandsMessage0") + "\n\n" +
-                    ModTranslation.getString("CommandsMessage1") + "\n" +
-                    ModTranslation.getString("CommandsMessage2") + "\n" +
-                    ModTranslation.getString("CommandsMessage3") + "\n" +
-                    ModTranslation.getString("CommandsMessage4") + "\n" +
-                    ModTranslation.getString("CommandsMessage5") + "\n" +
-                    ModTranslation.getString("CommandsMessage6") + "\n" +
-                    ModTranslation.getString("CommandsMessage7") + "\n" +
-                    ModTranslation.getString("CommandsMessage8") + "\n" +
-                    ModTranslation.getString("CommandsMessage9");
+                    ModTranslation.GetString("CommandsMessage0") + "\n\n" +
+                    ModTranslation.GetString("CommandsMessage1") + "\n" +
+                    ModTranslation.GetString("CommandsMessage2") + "\n" +
+                    ModTranslation.GetString("CommandsMessage3") + "\n" +
+                    ModTranslation.GetString("CommandsMessage4") + "\n" +
+                    ModTranslation.GetString("CommandsMessage5") + "\n" +
+                    ModTranslation.GetString("CommandsMessage6") + "\n" +
+                    ModTranslation.GetString("CommandsMessage7") + "\n" +
+                    ModTranslation.GetString("CommandsMessage8") + "\n" +
+                    ModTranslation.GetString("CommandsMessage9");
                 SendCommand(sourcePlayer, text);
+                return false;
             }
             else if (
                 Commands[0].Equals("/Discord", StringComparison.OrdinalIgnoreCase) ||
                 Commands[0].Equals("/dc", StringComparison.OrdinalIgnoreCase)
                 )
             {
-                SendCommand(sourcePlayer, ModTranslation.getString("SNROfficialDiscordMessage") + "\n" + MainMenuPatch.snrdiscordserver);
+                SendCommand(sourcePlayer, ModTranslation.GetString("SNROfficialDiscordMessage") + "\n" + MainMenuPatch.snrdiscordserver);
+                return false;
             }
             else if (
                 Commands[0].Equals("/Twitter", StringComparison.OrdinalIgnoreCase) ||
                 Commands[0].Equals("/tw", StringComparison.OrdinalIgnoreCase)
                 )
             {
-                SendCommand(sourcePlayer, ModTranslation.getString("SNROfficialTwitterMessage") + "\n\n" + ModTranslation.getString("TwitterOfficialLink") + "\n" + ModTranslation.getString("TwitterDevLink"));
+                SendCommand(sourcePlayer, ModTranslation.GetString("SNROfficialTwitterMessage") + "\n\n" + ModTranslation.GetString("TwitterOfficialLink") + "\n" + ModTranslation.GetString("TwitterDevLink"));
+                return false;
             }
             else if (
                 Commands[0].Equals("/GetInRoles", StringComparison.OrdinalIgnoreCase) ||
@@ -110,7 +121,6 @@ namespace SuperNewRoles.Patch
                     {
                         GetInRoleCommand(sourcePlayer);
                     }
-                    return;
                 }
                 else
                 {
@@ -121,6 +131,7 @@ namespace SuperNewRoles.Patch
                     }
                     GetInRoleCommand(target);
                 }
+                return false;
             }
             else if (
                 Commands[0].Equals("/AllRoles", StringComparison.OrdinalIgnoreCase) ||
@@ -137,7 +148,6 @@ namespace SuperNewRoles.Patch
                     {
                         RoleCommand(sourcePlayer);
                     }
-                    return;
                 }
                 else
                 {
@@ -148,10 +158,15 @@ namespace SuperNewRoles.Patch
                     }
                     if (!float.TryParse(Commands[1], out float sendtime))
                     {
-                        return;
+                        return false;
                     }
                     RoleCommand(SendTime: sendtime, target: target);
                 }
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
         static string GetChildText(List<CustomOption.CustomOption> options, string indent)
@@ -159,7 +174,7 @@ namespace SuperNewRoles.Patch
             string text = "";
             foreach (CustomOption.CustomOption option in options)
             {
-                text += indent + option.getName() + ":" + option.getString() + "\n";
+                text += indent + option.GetName() + ":" + option.GetString() + "\n";
                 if (option.children.Count > 0)
                 {
                     text += GetChildText(option.children, indent + "  ");
@@ -177,27 +192,26 @@ namespace SuperNewRoles.Patch
         {
             return type switch
             {
-                TeamRoleType.Crewmate => ModTranslation.getString("CrewMateName"),
-                TeamRoleType.Impostor => ModTranslation.getString("ImpostorName"),
-                TeamRoleType.Neutral => ModTranslation.getString("NeutralName").Replace("陣営", ""),
+                TeamRoleType.Crewmate => ModTranslation.GetString("CrewMateName"),
+                TeamRoleType.Impostor => ModTranslation.GetString("ImpostorName"),
+                TeamRoleType.Neutral => ModTranslation.GetString("NeutralName").Replace("陣営", ""),
                 _ => "",
             };
         }
         static string GetText(CustomRoleOption option)
         {
-            string text = "";
+            string text = "\n";
             IntroDate intro = option.Intro;
-            text += "【" + intro.Name + "】\n";
-            text += GetTeamText(intro.Team) + ModTranslation.getString("Team") + "\n";
+            text += GetTeamText(intro.Team) + ModTranslation.GetString("Team") + "\n";
             text += "「" + IntroDate.GetTitle(intro.NameKey, intro.TitleNum) + "」\n";
             text += intro.Description + "\n";
-            text += ModTranslation.getString("MessageSettings") + ":\n";
+            text += ModTranslation.GetString("MessageSettings") + ":\n";
             text += GetOptionText(option, intro);
             return text;
         }
         static string GetInRole(List<CustomRoleOption> optionsnotorder)
         {
-            string text = ModTranslation.getString("NowRolesMessage") + "\n";
+            string text = ModTranslation.GetString("NowRolesMessage") + "\n";
             var options = optionsnotorder.OrderBy((CustomRoleOption x) =>
             {
                 return x.Intro.Team switch
@@ -214,27 +228,28 @@ namespace SuperNewRoles.Patch
                 if (type != option.Intro.Team)
                 {
                     type = option.Intro.Team;
-                    text += "\n" + String.Format(ModTranslation.getString("TeamMessage"), GetTeamText(type)) + "\n\n";
+                    text += "\n" + Format(ModTranslation.GetString("TeamMessage"), GetTeamText(type)) + "\n\n";
                 }
                 int PlayerCount = 0;
                 foreach (CustomOption.CustomOption opt in option.children)
                 {
-                    if (opt.getName() == CustomOptions.SheriffPlayerCount.getName())
+                    if (opt.GetName() == CustomOptions.SheriffPlayerCount.GetName())
                     {
-                        PlayerCount = (int)opt.getFloat();
+                        PlayerCount = (int)opt.GetFloat();
                         break;
                     }
                 }
-                text += option.Intro.Name + " : " + PlayerCount + ModTranslation.getString("PlayerCountMessage") + "\n";
+                text += option.Intro.Name + " : " + PlayerCount + ModTranslation.GetString("PlayerCountMessage") + "\n";
             }
             return text;
         }
         static void RoleCommand(PlayerControl target = null, float SendTime = 1.5f)
         {
+            if (!AmongUsClient.Instance.AmHost) return;
             List<CustomRoleOption> EnableOptions = new();
             foreach (CustomRoleOption option in CustomRoleOption.RoleOptions)
             {
-                if (option.isRoleEnable && option.isSHROn)
+                if (option.IsRoleEnable && option.isSHROn)
                 {
                     EnableOptions.Add(option);
                 }
@@ -243,42 +258,44 @@ namespace SuperNewRoles.Patch
             foreach (CustomRoleOption option in EnableOptions)
             {
                 string text = GetText(option);
+                string rolename = "<size=115%>\n" + CustomOptions.Cs(option.Intro.color, option.Intro.NameKey + "Name") + "</size>";
                 SuperNewRolesPlugin.Logger.LogInfo(text);
-                Send(target, text, time);
+                Send(target, rolename, text, time);
                 time += SendTime;
             }
         }
         static void GetInRoleCommand(PlayerControl target = null)
         {
+            if (!AmongUsClient.Instance.AmHost) return;
             List<CustomRoleOption> EnableOptions = new();
             foreach (CustomRoleOption option in CustomRoleOption.RoleOptions)
             {
-                if (option.isRoleEnable && option.isSHROn)
+                if (option.IsRoleEnable && option.isSHROn)
                 {
                     EnableOptions.Add(option);
                 }
             }
             SendCommand(target, GetInRole(EnableOptions));
         }
-        static void Send(PlayerControl target, string text, float time = 0)
+        static void Send(PlayerControl target, string rolename, string text, float time = 0)
         {
             text = "\n" + text + "\n                                                                                                                                                                                                                                              ";
             if (time <= 0)
             {
                 if (target == null)
                 {
-                    string name = PlayerControl.LocalPlayer.getDefaultName();
-                    AmongUsClient.Instance.StartCoroutine(AllSend(SNRCommander, text, name));
+                    string name = PlayerControl.LocalPlayer.GetDefaultName();
+                    AmongUsClient.Instance.StartCoroutine(AllSend(SNRCommander + rolename, text, name));
                     return;
                 }
                 if (target.PlayerId != 0)
                 {
-                    AmongUsClient.Instance.StartCoroutine(PrivateSend(target, SNRCommander, text, time));
+                    AmongUsClient.Instance.StartCoroutine(PrivateSend(target, SNRCommander + rolename, text, time));
                 }
                 else
                 {
-                    string name = PlayerControl.LocalPlayer.getDefaultName();
-                    PlayerControl.LocalPlayer.SetName(SNRCommander);
+                    string name = PlayerControl.LocalPlayer.GetDefaultName();
+                    PlayerControl.LocalPlayer.SetName(SNRCommander + "\n" + rolename);
                     FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(PlayerControl.LocalPlayer, text);
                     PlayerControl.LocalPlayer.SetName(name);
                 }
@@ -286,21 +303,21 @@ namespace SuperNewRoles.Patch
             }
             else
             {
-                string name = PlayerControl.LocalPlayer.getDefaultName();
+                string name = PlayerControl.LocalPlayer.GetDefaultName();
                 if (target == null)
                 {
-                    AmongUsClient.Instance.StartCoroutine(AllSend(SNRCommander, text, name, time));
+                    AmongUsClient.Instance.StartCoroutine(AllSend(SNRCommander + rolename, text, name, time));
                     return;
                 }
                 if (target.PlayerId != 0)
                 {
-                    AmongUsClient.Instance.StartCoroutine(PrivateSend(target, SNRCommander, text, time));
+                    AmongUsClient.Instance.StartCoroutine(PrivateSend(target, SNRCommander + rolename, text, time));
                 }
                 else
                 {
                     new LateTask(() =>
                     {
-                        PlayerControl.LocalPlayer.SetName(SNRCommander);
+                        PlayerControl.LocalPlayer.SetName(SNRCommander + rolename);
                         FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(PlayerControl.LocalPlayer, text);
                         PlayerControl.LocalPlayer.SetName(name);
                     }, time);
@@ -310,6 +327,7 @@ namespace SuperNewRoles.Patch
         }
         public static void SendCommand(PlayerControl target, string command, string SendName = "NONE")
         {
+            if (!AmongUsClient.Instance.AmHost) return;
             if (SendName == "NONE") SendName = SNRCommander;
             command = $"\n{command}\n";
             if (target != null && target.Data.Disconnected) return;
@@ -339,16 +357,16 @@ namespace SuperNewRoles.Patch
                 yield return new WaitForSeconds(time);
             }
             var crs = CustomRpcSender.Create();
-            crs.StartRpc(CachedPlayer.LocalPlayer.NetId, RpcCalls.SetName)
+            crs.AutoStartRpc(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SetName)
                 .Write(SendName)
-                .EndRpc();
-            crs.StartRpc(CachedPlayer.LocalPlayer.NetId, RpcCalls.SendChat)
+                .EndRpc()
+                .AutoStartRpc(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SendChat)
                 .Write(command)
-                .EndRpc(); ;
-            crs.StartRpc(CachedPlayer.LocalPlayer.NetId, RpcCalls.SetName)
+                .EndRpc()
+                .AutoStartRpc(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SetName)
                 .Write(name)
-                .EndRpc();
-            crs.SendMessage();
+                .EndRpc()
+                .SendMessage();
             PlayerControl.LocalPlayer.SetName(SendName);
             FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(PlayerControl.LocalPlayer, command);
             PlayerControl.LocalPlayer.SetName(name);
@@ -359,17 +377,17 @@ namespace SuperNewRoles.Patch
             {
                 yield return new WaitForSeconds(time);
             }
-            var crs = CustomRpcSender.Create(Hazel.SendOption.None);
-            crs.StartRpc(target.NetId, RpcCalls.SetName, target.getClientId())
+            var crs = CustomRpcSender.Create();
+            crs.AutoStartRpc(target.NetId, (byte)RpcCalls.SetName, target.GetClientId())
                 .Write(SendName)
-                .EndRpc();
-            crs.StartRpc(target.NetId, RpcCalls.SendChat, target.getClientId())
+                .EndRpc()
+                .AutoStartRpc(target.NetId, (byte)RpcCalls.SendChat, target.GetClientId())
                 .Write(command)
-                .EndRpc();
-            crs.StartRpc(target.NetId, RpcCalls.SetName, target.getClientId())
+                .EndRpc()
+                .AutoStartRpc(target.NetId, (byte)RpcCalls.SetName, target.GetClientId())
                 .Write(target.Data.PlayerName)
-                .EndRpc();
-            crs.SendMessage();
+                .EndRpc()
+                .SendMessage();
         }
     }/*
     [HarmonyPatch(typeof(ChatController),nameof(ChatController.AddChat))]
@@ -382,7 +400,7 @@ namespace SuperNewRoles.Patch
                 return false;
             GameData.PlayerInfo data1 = CachedPlayer.LocalPlayer.Data;
             GameData.PlayerInfo data2 = sourcePlayer.Data;
-            if (data2 == null || data1 == null || data2.IsDead && (!PlayerControl.LocalPlayer.isDead() || PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.NiceRedRidingHood)))
+            if (data2 == null || data1 == null || data2.IsDead && (!PlayerControl.LocalPlayer.IsDead() || PlayerControl.LocalPlayer.IsRole(RoleId.NiceRedRidingHood)))
                 return false;
             if (__instance.chatBubPool.NotInUse == 0)
                 __instance.chatBubPool.ReclaimOldest();

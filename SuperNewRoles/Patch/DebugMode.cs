@@ -1,19 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Security.Cryptography;
-using BepInEx;
-using BepInEx.Configuration;
-using BepInEx.IL2CPP;
+using BepInEx.IL2CPP.Utils;
 using HarmonyLib;
 using Hazel;
-using InnerNet;
 using SuperNewRoles.CustomOption;
-using UnhollowerBaseLib;
+using SuperNewRoles.CustomRPC;
+using SuperNewRoles.Helpers;
 using UnityEngine;
 
 namespace SuperNewRoles.Patch
@@ -37,14 +31,14 @@ namespace SuperNewRoles.Patch
         public static class DebugManager
         {
             private static readonly System.Random random = new((int)DateTime.Now.Ticks);
-            private static List<PlayerControl> bots = new();
+            private static readonly List<PlayerControl> bots = new();
             public class LateTask
             {
                 public string name;
                 public float timer;
                 public Action action;
                 public static List<LateTask> Tasks = new();
-                public bool run(float deltaTime)
+                public bool Run(float deltaTime)
                 {
                     timer -= deltaTime;
                     if (timer <= 0)
@@ -66,7 +60,7 @@ namespace SuperNewRoles.Patch
                     var TasksToRemove = new List<LateTask>();
                     Tasks.ForEach((task) =>
                     {
-                        if (task.run(deltaTime))
+                        if (task.Run(deltaTime))
                         {
                             TasksToRemove.Add(task);
                         }
@@ -81,25 +75,40 @@ namespace SuperNewRoles.Patch
                 // Spawn dummys
                 if (Input.GetKeyDown(KeyCode.G))
                 {
-                    PlayerControl bot = BotManager.Spawn(PlayerControl.LocalPlayer.nameText().text);
+                    PlayerControl bot = BotManager.Spawn(PlayerControl.LocalPlayer.NameText().text);
 
-                    new LateTask(() => bot.NetTransform.RpcSnapTo(new Vector2(0, 15)), 0.2f, "Bot TP Task");
-                    new LateTask(() => { foreach (var pc in CachedPlayer.AllPlayers) pc.PlayerControl.RpcMurderPlayer(bot); }, 0.4f, "Bot Kill Task");
-                    new LateTask(() => bot.Despawn(), 0.6f, "Bot Despawn Task");
+                    bot.NetTransform.SnapTo(PlayerControl.LocalPlayer.transform.position);
+                    //new LateTask(() => bot.NetTransform.RpcSnapTo(new Vector2(0, 15)), 0.2f, "Bot TP Task");
+                    //new LateTask(() => { foreach (var pc in CachedPlayer.AllPlayers) pc.PlayerControl.RpcMurderPlayer(bot); }, 0.4f, "Bot Kill Task");
+                    //new LateTask(() => bot.Despawn(), 0.6f, "Bot Despawn Task");
                 }
-                /*
+
+                //ここにデバッグ用のものを書いてね
                 if (Input.GetKeyDown(KeyCode.I))
                 {
-                    foreach (PlayerControl p in CachedPlayer.AllPlayers)
-                    {
-                        if (p == PlayerControl.LocalPlayer) continue;
-                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.MyPhysics.NetId, (byte)RpcCalls.EnterVent, SendOption.None, p.getClientId());
-                        writer.WritePacked(MapUtilities.CachedShipStatus.AllVents[0].Id);
-                        AmongUsClient.Instance.FinishRpcImmediately(writer);
-                        SuperNewRolesPlugin.Logger.LogInfo(MapUtilities.CachedShipStatus.AllVents[0].transform);
-                    }
+                    MessageWriter writer = RPCHelper.StartRPC(CustomRPC.CustomRPC.UncheckedUsePlatform);
+                    writer.Write((byte)4);
+                    writer.Write(false);
+                    writer.EndRPC();
+                    RPCProcedure.UncheckedUsePlatform((byte)4, true);
                 }
-
+                if (Input.GetKeyDown(KeyCode.K))
+                {
+                    PVCreator.Start();
+                }
+                if (Input.GetKeyDown(KeyCode.L))
+                {
+                    PVCreator.End();
+                }
+                if (Input.GetKeyDown(KeyCode.M))
+                {
+                    PVCreator.Start2();
+                }
+                if (Input.GetKeyDown(KeyCode.N))
+                {
+                    ModHelpers.PlayerById(1).RpcMurderPlayer(PlayerControl.LocalPlayer);//ModHelpers.PlayerById(2));
+                }
+                /*
                     if (Input.GetKeyDown(KeyCode.C))
                     {
                         SuperNewRolesPlugin.Logger.LogInfo("CHANGE!!!");
@@ -120,6 +129,10 @@ namespace SuperNewRoles.Patch
                 {
                     BotManager.AllBotDespawn();
                 }
+                if (Input.GetKeyDown(KeyCode.F1))
+                {
+                    SuperNewRolesPlugin.Logger.LogInfo("new Vector2("+(PlayerControl.LocalPlayer.transform.position.x - 12.63f) +"f, "+ (PlayerControl.LocalPlayer.transform.position.y + 3.46f) + "f), ");
+                }
             }
 
             public static string RandomString(int length)
@@ -134,7 +147,7 @@ namespace SuperNewRoles.Patch
             var IsDebugModeBool = false;
             if (ConfigRoles.DebugMode.Value)
             {
-                if (CustomOptions.IsDebugMode.getBool())
+                if (CustomOptions.IsDebugMode.GetBool())
                 {
                     IsDebugModeBool = true;
                 }

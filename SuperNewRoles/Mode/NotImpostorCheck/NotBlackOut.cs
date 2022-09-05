@@ -1,12 +1,5 @@
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using HarmonyLib;
-using Hazel;
-using InnerNet;
-using UnityEngine;
+using SuperNewRoles.Mode.SuperHostRoles;
 
 namespace SuperNewRoles.Mode.NotImpostorCheck
 {
@@ -15,15 +8,15 @@ namespace SuperNewRoles.Mode.NotImpostorCheck
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CheckForEndVoting))]
         class CheckForEndVotingPatch
         {
-            public static void Prefix(MeetingHud __instance)
+            public static void Prefix()
             {
-                if (ModeHandler.isMode(Mode.ModeId.NotImpostorCheck))
+                if (ModeHandler.IsMode(ModeId.NotImpostorCheck))
                 {
                     EndMeetingPatch();
                 }
-                else if (ModeHandler.isMode(ModeId.SuperHostRoles))
+                else if (ModeHandler.IsMode(ModeId.SuperHostRoles))
                 {
-                    SuperHostRoles.MorePatch.MeetingEnd();
+                    MorePatch.MeetingEnd();
                 }
             }
         }
@@ -39,7 +32,7 @@ namespace SuperNewRoles.Mode.NotImpostorCheck
 			{
 				return;
 			}
-			int clientId = pc.getClientId();
+			int clientId = pc.GetClientId();
 			byte reactorId = 3;
 			if (PlayerControl.GameOptions.MapId == 2)
 			{

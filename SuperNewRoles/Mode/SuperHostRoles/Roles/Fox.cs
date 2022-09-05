@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using HarmonyLib;
+using SuperNewRoles.CustomRPC;
 using SuperNewRoles.Roles;
 
 namespace SuperNewRoles.Mode.SuperHostRoles.Roles
@@ -11,10 +9,10 @@ namespace SuperNewRoles.Mode.SuperHostRoles.Roles
         [HarmonyPatch(typeof(HudManager), nameof(HudManager.SetHudActive))]
         class SetHudActivePatch
         {
-            public static void Postfix(HudManager __instance, [HarmonyArgument(0)] bool isActive)
+            public static void Postfix(HudManager __instance)
             {
                 if (!AmongUsClient.Instance.AmHost) return;
-                if (PlayerControl.LocalPlayer.isRole(CustomRPC.RoleId.Fox))
+                if (PlayerControl.LocalPlayer.IsRole(RoleId.Fox))
                 {
                     __instance.ReportButton.ToggleVisible(visible: RoleClass.Fox.UseReport);
                 }

@@ -1,23 +1,22 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using BepInEx.IL2CPP.Utils;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using SuperNewRoles.CustomCosmetics;
+using SuperNewRoles.CustomOption;
 using SuperNewRoles.Patch;
 using TMPro;
 using Twitch;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace SuperNewRoles.Patches
 {
     [HarmonyPatch]
@@ -25,15 +24,14 @@ namespace SuperNewRoles.Patches
     {
         public static string baseCredentials = $@"<size=130%><color=#ffa500>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color></size> v{SuperNewRolesPlugin.Version}";
 
-        private static Task<bool> kari;
-
         [HarmonyPatch(typeof(VersionShower), nameof(VersionShower.Start))]
         private static class VersionShowerPatch
         {
-            static void Prefix(VersionShower __instance)
+            static void Prefix()
             {
                 //CustomPlate.UnlockedNamePlatesPatch.Postfix(HatManager.Instance);
             }
+            public static string modColor = "#a6d289";
             static void Postfix(VersionShower __instance)
             {
 
@@ -41,14 +39,23 @@ namespace SuperNewRoles.Patches
                 if (amongUsLogo == null) return;
                 var credentials = UnityEngine.Object.Instantiate<TMPro.TextMeshPro>(__instance.text);
                 credentials.transform.position = new Vector3(0, 0f, 0);
-                credentials.SetText(ModTranslation.getString("creditsMain"));
+                //ブランチ名表示
+                string credentialsText = "";
+                if (ThisAssembly.Git.Branch != "master")//masterビルド以外の時
+                {
+                    //色+ブランチ名+コミット番号
+                    credentialsText = $"\r\n<color={modColor}>{ThisAssembly.Git.Branch}({ThisAssembly.Git.Commit})</color>";
+                }
+                credentialsText += ModTranslation.GetString("creditsMain");
+                credentials.SetText(credentialsText);
+
                 credentials.alignment = TMPro.TextAlignmentOptions.Center;
                 credentials.fontSize *= 0.9f;
                 AutoUpdate.checkForUpdate(credentials);
 
-                var version = UnityEngine.Object.Instantiate<TMPro.TextMeshPro>(credentials);
+                var version = UnityEngine.Object.Instantiate(credentials);
                 version.transform.position = new Vector3(0, -0.35f, 0);
-                version.SetText(string.Format(ModTranslation.getString("creditsVersion"), SuperNewRolesPlugin.Version.ToString()));
+                version.SetText(string.Format(ModTranslation.GetString("creditsVersion"), SuperNewRolesPlugin.Version.ToString()));
 
                 credentials.transform.SetParent(amongUsLogo.transform);
                 version.transform.SetParent(amongUsLogo.transform);
@@ -60,7 +67,7 @@ namespace SuperNewRoles.Patches
         {
             static void Postfix(PingTracker __instance)
             {
-                __instance.text.alignment = TMPro.TextAlignmentOptions.TopRight;
+                __instance.text.alignment = TextAlignmentOptions.TopRight;
                 if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
                 {
                     __instance.text.text = $"{baseCredentials}\n{__instance.text.text}";
@@ -68,27 +75,33 @@ namespace SuperNewRoles.Patches
                     {
                         if (DebugMode.IsDebugMode())
                         {
-                            __instance.text.text += "\n" + ModTranslation.getString("DebugModeOn");
+                            __instance.text.text += "\n" + ModTranslation.GetString("DebugModeOn");
                         }
-                        if (!Mode.ModeHandler.isMode(Mode.ModeId.Default))
+                        if (!Mode.ModeHandler.IsMode(Mode.ModeId.Default))
                         {
-                            __instance.text.text += "\n" + ModTranslation.getString("SettingMode") + ":" + Mode.ModeHandler.ThisModeSetting.getString();
+                            __instance.text.text += "\n" + ModTranslation.GetString("SettingMode") + ":" + Mode.ModeHandler.ThisModeSetting.GetString();
                         }
                     }
                     catch { }
-                    if (CachedPlayer.LocalPlayer.Data.IsDead)
+                    //ブランチ名表示
+                    if (ThisAssembly.Git.Branch != "master")//masterビルド以外の時
                     {
-                        __instance.transform.localPosition = new Vector3(3.45f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
+                        //改行+Branch名+コミット番号
+                        __instance.text.text += "\n" + $"{ThisAssembly.Git.Branch}({ThisAssembly.Git.Commit})";
                     }
-                    else
-                    {
-                        __instance.transform.localPosition = new Vector3(4.2f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
-                    }
+                    __instance.transform.localPosition = CachedPlayer.LocalPlayer.Data.IsDead
+                        ? new Vector3(3.45f, __instance.transform.localPosition.y, __instance.transform.localPosition.z)
+                        : new Vector3(4.2f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
+                    __instance.gameObject.GetComponent<AspectPosition>().DistanceFromEdge = new Vector3(1.2f, 0.1f, 0.5f);
                 }
                 else
                 {
-                    __instance.text.text = $"{baseCredentials}\n{ModTranslation.getString("creditsFull")}\n{__instance.text.text}";
-                    __instance.transform.localPosition = new Vector3(3.5f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
+                    __instance.text.text = $"{baseCredentials}\n{ModTranslation.GetString("creditsFull")}\n{__instance.text.text}";
+                    __instance.transform.localPosition = new Vector3(4f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
+                }
+                if (CustomHats.HatManagerPatch.IsLoadingnow)
+                {
+                    __instance.text.text += $"\n{ModTranslation.GetString("LoadHat")}";
                 }
             }
         }
@@ -117,6 +130,7 @@ namespace SuperNewRoles.Patches
             }
             public static string SponsersData = "";
             public static string DevsData = "";
+            public static string TransData = "";
 
             public static async Task<HttpStatusCode> FetchBoosters()
             {
@@ -125,7 +139,7 @@ namespace SuperNewRoles.Patches
                     Downloaded = true;
                     HttpClient http = new();
                     http.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true, OnlyIfCached = false };
-                    var response = await http.GetAsync(new System.Uri("https://raw.githubusercontent.com/ykundesu/SuperNewRoles/master/CreditsData.json"), HttpCompletionOption.ResponseContentRead);
+                    var response = await http.GetAsync(new Uri("https://raw.githubusercontent.com/ykundesu/SuperNewRoles/master/CreditsData.json"), HttpCompletionOption.ResponseContentRead);
                     try
                     {
                         if (response.StatusCode != HttpStatusCode.OK)
@@ -158,6 +172,15 @@ namespace SuperNewRoles.Patches
                                 SponsersData += current["name"]?.ToString() + "\n";
                             }
                         }
+
+                        var Translator = jobj["Translate"];
+                        for (JToken current = Translator.First; current != null; current = current.Next)
+                        {
+                            if (current.HasValues)
+                            {
+                                TransData += current["name"]?.ToString() + "\n";
+                            }
+                        }
                     }
                     catch (Exception e)
                     {
@@ -174,7 +197,7 @@ namespace SuperNewRoles.Patches
                 CreditsPopup = obj;
                 GameObject.Destroy(obj.GetComponent<StatsPopup>());
                 var devtitletext = obj.transform.FindChild("StatNumsText_TMP");
-                devtitletext.GetComponent<TextMeshPro>().text = "開発者";
+                devtitletext.GetComponent<TextMeshPro>().text = ModTranslation.GetString("Developer");
                 devtitletext.localPosition = new Vector3(-3.25f, -1.65f, -2f);
                 devtitletext.localScale = new Vector3(1.5f, 1.5f, 1f);
                 var devtext = obj.transform.FindChild("StatsText_TMP");
@@ -183,7 +206,7 @@ namespace SuperNewRoles.Patches
                 devtext.GetComponent<TextMeshPro>().text = DevsData;
 
                 var boostertitletext = GameObject.Instantiate(devtitletext, obj.transform);
-                boostertitletext.GetComponent<TextMeshPro>().text = "スポンサー";
+                boostertitletext.GetComponent<TextMeshPro>().text = ModTranslation.GetString("Sponsor");
                 boostertitletext.localPosition = new Vector3(1.45f, -1.65f, -2f);
                 boostertitletext.localScale = new Vector3(1.5f, 1.5f, 1f);
 
@@ -192,18 +215,50 @@ namespace SuperNewRoles.Patches
                 boostertext.localScale = new Vector3(1.25f, 1.25f, 1f);
                 boostertext.GetComponent<TextMeshPro>().text = SponsersData;
 
+                var transtitletext = GameObject.Instantiate(devtitletext, obj.transform);
+                transtitletext.GetComponent<TextMeshPro>().text = ModTranslation.GetString("Translator");
+                transtitletext.localPosition = new Vector3(0.5f, -4.5f, -2f);
+                transtitletext.localScale = new Vector3(1.5f, 1.5f, 1f);
+
+                var transtext = GameObject.Instantiate(devtext, obj.transform);
+                transtext.localPosition = new Vector3(3f, -5f, -2f);
+                transtext.localScale = new Vector3(1.5f, 1.5f, 1f);
+                transtext.GetComponent<TextMeshPro>().text = TransData;
 
                 var textobj = obj.transform.FindChild("Title_TMP");
                 GameObject.Destroy(textobj.GetComponent<TextTranslatorTMP>());
-                textobj.GetComponent<TextMeshPro>().text = "開発者&支援者";
+                textobj.GetComponent<TextMeshPro>().text = ModTranslation.GetString("DevAndSpnTitle");
                 textobj.localScale = new Vector3(1.5f, 1.5f, 1f);
                 obj.transform.FindChild("Background").localScale = new Vector3(1.5f, 1f, 1f);
                 obj.transform.FindChild("CloseButton").localPosition = new Vector3(-3.75f, 2.65f, 0);
             }
             static bool Downloaded = false;
             public static MainMenuManager instance;
+            static IEnumerator ShowAnnouncementPopUp(MainMenuManager __instance)
+            {
+                while (true)
+                {
+                    SuperNewRolesPlugin.Logger.LogInfo(AutoUpdate.announcement);
+                    if (AutoUpdate.announcement == "None")
+                        yield return null;
+                    else
+                        break;
+                }
+                var AnnouncementPopup = __instance.transform.FindChild("Announcement").GetComponent<AnnouncementPopUp>();
+                if (AnnouncementPopup != null)
+                {
+                    AnnouncementPopup.Show();
+                    AnnouncementPopup.AnnounceTextMeshPro.text = AutoUpdate.announcement;
+                }
+                ConfigRoles.IsUpdated = false;
+            }
             public static void Postfix(MainMenuManager __instance)
             {
+                AmongUsClient.Instance.StartCoroutine(CustomRegulation.FetchRegulation());
+                if (ConfigRoles.IsUpdated)
+                {
+                    __instance.StartCoroutine(ShowAnnouncementPopUp(__instance));
+                }
                 DownLoadCustomhat.Load();
                 DownLoadClass.Load();
                 DownLoadClassVisor.Load();
@@ -226,10 +281,10 @@ namespace SuperNewRoles.Patches
                 var snrLogo = new GameObject("bannerLogo");
                 snrLogo.transform.position = Vector3.up;
                 renderer = snrLogo.AddComponent<SpriteRenderer>();
-                loadSprites();
-                renderer.sprite = ModHelpers.loadSpriteFromResources("SuperNewRoles.Resources.banner.png", 150f);
+                LoadSprites();
+                renderer.sprite = ModHelpers.LoadSpriteFromResources("SuperNewRoles.Resources.banner.png", 150f);
 
-                loadSprites();
+                LoadSprites();
                 renderer.sprite = HorseModeOption.enableHorseMode ? horseBannerSprite : bannerSprite;
 
                 if (File.Exists(Assembly.GetExecutingAssembly().Location.Replace("SuperNewRoles.dll", "Submerged.dll"))) return;
@@ -249,7 +304,7 @@ namespace SuperNewRoles.Patches
                 var text = button.transform.GetChild(0).GetComponent<TMPro.TMP_Text>();
                 __instance.StartCoroutine(Effects.Lerp(0.1f, new System.Action<float>((p) =>
                 {
-                    text.SetText(ModTranslation.getString("サブマージドを適用する"));
+                    text.SetText(ModTranslation.GetString("サブマージドを適用する"));
                 })));
 
                 TwitchManager man = DestroyableSingleton<TwitchManager>.Instance;
@@ -257,11 +312,11 @@ namespace SuperNewRoles.Patches
                 popup.TextAreaTMP.fontSize *= 0.7f;
                 popup.TextAreaTMP.enableAutoSizing = false;
 
-                void onClick()
+                async void onClick()
                 {
                     SuperNewRolesPlugin.Logger.LogInfo("[Submerged]Downloading Submerged!");
-                    showPopup(ModTranslation.getString("ダウンロード中です。\nサブマージドのファイルは大きいため、時間がかかります。"));
-                    DownloadSubmarged();
+                    ShowPopup(ModTranslation.GetString("ダウンロード中です。\nサブマージドのファイルは大きいため、時間がかかります。"));
+                    await DownloadSubmarged();
                     button.SetActive(false);
                 }
             }
@@ -271,15 +326,15 @@ namespace SuperNewRoles.Patches
                 throw new NotImplementedException();
             }
 
-            public static void loadSprites()
+            public static void LoadSprites()
             {
-                if (bannerSprite == null) bannerSprite = ModHelpers.loadSpriteFromResources("SuperNewRoles.Resources.banner.png", 150f);
-                if (horseBannerSprite == null) horseBannerSprite = ModHelpers.loadSpriteFromResources("SuperNewRoles.Resources.SuperHorseRoles.png", 150f);
+                if (bannerSprite == null) bannerSprite = ModHelpers.LoadSpriteFromResources("SuperNewRoles.Resources.banner.png", 150f);
+                if (horseBannerSprite == null) horseBannerSprite = ModHelpers.LoadSpriteFromResources("SuperNewRoles.Resources.SuperHorseRoles.png", 150f);
             }
 
-            public static void updateSprite()
+            public static void UpdateSprite()
             {
-                loadSprites();
+                LoadSprites();
                 if (renderer != null)
                 {
                     float fadeDuration = 1f;
@@ -298,14 +353,13 @@ namespace SuperNewRoles.Patches
                 }
             }
 
-            private static Task DownloadTask = null;
             public static async Task<bool> DownloadSubmarged()
             {
                 try
                 {
                     HttpClient httpa = new();
                     httpa.DefaultRequestHeaders.Add("User-Agent", "SuperNewRoles Downloader");
-                    var responsea = await httpa.GetAsync(new System.Uri("https://api.github.com/repos/submergedAmongUs/submerged/releases/latest"), HttpCompletionOption.ResponseContentRead);
+                    var responsea = await httpa.GetAsync(new Uri("https://api.github.com/repos/submergedAmongUs/submerged/releases/latest"), HttpCompletionOption.ResponseContentRead);
                     if (responsea.StatusCode != HttpStatusCode.OK || responsea.Content == null)
                     {
                         System.Console.WriteLine("Server returned no data: " + responsea.StatusCode.ToString());
@@ -331,7 +385,7 @@ namespace SuperNewRoles.Patches
                     }
                     HttpClient http = new();
                     http.DefaultRequestHeaders.Add("User-Agent", "SuperNewRoles Downloader");
-                    var response = await http.GetAsync(new System.Uri(url), HttpCompletionOption.ResponseContentRead);
+                    var response = await http.GetAsync(new Uri(url), HttpCompletionOption.ResponseContentRead);
                     if (response.StatusCode != HttpStatusCode.OK || response.Content == null)
                     {
                         System.Console.WriteLine("Server returned no data: " + response.StatusCode.ToString());
@@ -345,7 +399,7 @@ namespace SuperNewRoles.Patches
                         // probably want to have proper name here
                         responseStream.CopyTo(fileStream);
                     }
-                    showPopup(ModTranslation.getString("ダウンロード完了！\n再起動してください！"));
+                    ShowPopup(ModTranslation.GetString("ダウンロード完了！\n再起動してください！"));
                     return true;
                 }
                 catch (System.Exception ex)
@@ -353,16 +407,16 @@ namespace SuperNewRoles.Patches
                     SuperNewRolesPlugin.Instance.Log.LogError(ex.ToString());
                     System.Console.WriteLine(ex);
                 }
-                showPopup(ModTranslation.getString("ダウンロード失敗！"));
+                ShowPopup(ModTranslation.GetString("ダウンロード失敗！"));
                 return false;
             }
-            private static void showPopup(string message)
+            private static void ShowPopup(string message)
             {
-                setPopupText(message);
+                SetPopupText(message);
                 popup.gameObject.SetActive(true);
             }
 
-            public static void setPopupText(string message)
+            public static void SetPopupText(string message)
             {
                 if (popup == null)
                     return;

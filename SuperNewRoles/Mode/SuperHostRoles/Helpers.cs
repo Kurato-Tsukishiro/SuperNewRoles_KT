@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Hazel;
 
 namespace SuperNewRoles.Mode.SuperHostRoles
@@ -22,8 +19,8 @@ namespace SuperNewRoles.Mode.SuperHostRoles
 
             if (player == null) return;
             if (seer == null) seer = player;
-            var clientId = seer.getClientId();
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(player.NetId, (byte)RpcCalls.SetRole, Hazel.SendOption.Reliable, clientId);
+            var clientId = seer.GetClientId();
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(player.NetId, (byte)RpcCalls.SetRole, SendOption.Reliable, clientId);
             writer.Write((ushort)role);
             AmongUsClient.Instance.FinishRpcImmediately(writer);
         }
@@ -31,14 +28,15 @@ namespace SuperNewRoles.Mode.SuperHostRoles
         {
             //player: 名前の変更対象
             //seer: 上の変更を確認することができるプレイヤー
-
             if (player == null) return;
             if (seer == null) seer = player;
-            var clientId = seer.getClientId();
+            var clientId = seer.GetClientId();
             SuperNewRolesPlugin.Logger.LogInfo("(Desync => " + seer.Data.PlayerName + " ) " + player.Data.PlayerName + " => " + role);
-            sender.StartRpc(player.NetId, RpcCalls.SetRole, targetClientId: clientId);
-            sender.Write((ushort)role);
-            sender.EndRpc();
+            sender.StartMessage(clientId)
+                .StartRpc(player.NetId, RpcCalls.SetRole)
+                .Write((ushort)role)
+                .EndRpc()
+                .EndMessage();
         }
         public static void RpcSetRole(this PlayerControl player, CustomRpcSender sender, RoleTypes role)
         {

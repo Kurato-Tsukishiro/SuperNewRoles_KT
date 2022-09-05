@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using SuperNewRoles.EndGame;
-using UnityEngine;
 using static SuperNewRoles.EndGame.CheckGameEndPatch;
 
 namespace SuperNewRoles.Mode.HideAndSeek
 {
-    class main
+    class Main
     {
         public static bool EndGameCheck(ShipStatus __instance, PlayerStatistics statistics)
         {

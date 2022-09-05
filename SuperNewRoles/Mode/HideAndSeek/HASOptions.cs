@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using SuperNewRoles.CustomOption;
-using UnityEngine;
 
 namespace SuperNewRoles.Mode.HideAndSeek
 {
-    public class ZombieOptions
+    public class HideAndSeekOptions
     {
         public static CustomOption.CustomOption HideAndSeekMode;
         public static CustomOption.CustomOption HASDeathTask;

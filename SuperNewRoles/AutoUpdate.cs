@@ -3,9 +3,9 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using Agartha;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
-using Twitch;
 
 namespace SuperNewRoles
 {
@@ -21,16 +21,21 @@ namespace SuperNewRoles
                 return false;
             }
         }
-        public static string announcement;
+        [HarmonyPatch(typeof(AnnouncementPopUp), nameof(AnnouncementPopUp.Init))]
+        public static class AnnouncementInitpatch
+        {
+            public static bool Prefix(AnnouncementPopUp __instance)
+            {
+                __instance.UpdateAnnounceText();
+                return false;
+            }
+        }
+        public static string announcement = "None";
         public static GenericPopup InfoPopup;
         private static bool IsLoad = false;
         public static string updateURL = null;
         public static void Load()
         {
-            TwitchManager man = DestroyableSingleton<TwitchManager>.Instance;
-            InfoPopup = UnityEngine.Object.Instantiate<GenericPopup>(man.TwitchPopup);
-            InfoPopup.TextAreaTMP.fontSize *= 0.7f;
-            InfoPopup.TextAreaTMP.enableAutoSizing = false;
         }
         public static async Task<bool> Update()
         {
@@ -58,6 +63,29 @@ namespace SuperNewRoles
                     // probably want to have proper name here
                     responseStream.CopyTo(fileStream);
                 }
+
+                //アガルタ
+                updateURL = updateURL.Replace("SuperNewRoles.dll","Agartha.dll");
+                response = await http.GetAsync(new System.Uri(updateURL), HttpCompletionOption.ResponseContentRead);
+                if (response.StatusCode != HttpStatusCode.OK || response.Content == null)
+                {
+                    System.Console.WriteLine("Server returned no data: " + response.StatusCode.ToString());
+                    return false;
+                }
+                codeBase = Assembly.GetExecutingAssembly().CodeBase.Replace("SuperNewRoles.dll", "Agartha.dll");
+                uri = new(codeBase);
+                fullname = System.Uri.UnescapeDataString(uri.Path);
+                if (File.Exists(fullname + ".old")) // Clear old file in case it wasnt;
+                    File.Delete(fullname + ".old");
+
+                File.Move(fullname, fullname + ".old"); // rename current executable to old
+
+                using (var responseStream = await response.Content.ReadAsStreamAsync())
+                {
+                    using var fileStream = File.Create(fullname);
+                    // probably want to have proper name here
+                    responseStream.CopyTo(fileStream);
+                }
                 SuperNewRolesPlugin.IsUpdate = true;
                 return true;
             }
@@ -70,15 +98,7 @@ namespace SuperNewRoles
         }
         public static async Task<bool> checkForUpdate(TMPro.TextMeshPro setdate)
         {
-            if (!ConfigRoles.AutoUpdate.Value)
-            {
-                return false;
-            }
-            if (!IsLoad)
-            {
-                AutoUpdate.Load();
-                IsLoad = true;
-            }
+            Logger.Info("checkForUpdateが来ました");
             try
             {
                 HttpClient http = new();
@@ -95,6 +115,7 @@ namespace SuperNewRoles
                 string tagname = data["tag_name"]?.ToString();
                 if (tagname == null)
                 {
+                    Logger.Info("自動アップデートなのにタグね～じゃん！フィクションはバグだけにしとけよな！");
                     return false; // Something went wrong
                 }
                 string changeLog = data["body"]?.ToString();
@@ -103,12 +124,66 @@ namespace SuperNewRoles
                 SuperNewRolesPlugin.NewVersion = tagname.Replace("v", "");
                 System.Version newver = System.Version.Parse(SuperNewRolesPlugin.NewVersion);
                 System.Version Version = SuperNewRolesPlugin.Version;
-                announcement = string.Format(ModTranslation.getString("announcementUpdate"), newver, announcement);
+                announcement = string.Format(ModTranslation.GetString("announcementUpdate"), newver, announcement);
+                if (!ConfigRoles.AutoUpdate.Value)
+                {
+                    Logger.Info("AutoUpdateRETURN", "AutoUpdate");
+                    return false;
+                }
+                if (!IsLoad)
+                {
+                    AutoUpdate.Load();
+                    IsLoad = true;
+                }
                 if (newver == Version)
                 {
                     if (ConfigRoles.DebugMode.Value)
                     {
                         SuperNewRolesPlugin.Logger.LogInfo("最新バージョンです");
+                    }
+                    if (AgarthaPlugin.VersionString != SuperNewRolesPlugin.VersionString)
+                    {
+                        Logger.Info("アガルタが古いです");
+                        JToken assets = data["assets"];
+                        if (!assets.HasValues)
+                            return false;
+                        for (JToken current = assets.First; current != null; current = current.Next)
+                        {
+                            string browser_download_url = current["browser_download_url"]?.ToString();
+                            if (browser_download_url != null && current["content_type"] != null)
+                            {
+                                if (current["content_type"].ToString().Equals("application/x-msdownload") &&
+                                    browser_download_url.EndsWith("SuperNewRoles.dll"))
+                                {
+                                    updateURL = browser_download_url;
+                                    break;
+                                }
+                            }
+                        }
+                        updateURL = updateURL.Replace("SuperNewRoles.dll", "Agartha.dll");
+                        response = await http.GetAsync(new System.Uri(updateURL), HttpCompletionOption.ResponseContentRead);
+                        if (response.StatusCode == HttpStatusCode.OK && response.Content != null)
+                        {
+                            var codeBase = Assembly.GetExecutingAssembly().CodeBase.Replace("SuperNewRoles.dll","Agartha.dll");
+                            System.UriBuilder uri = new(codeBase);
+                            var fullname = System.Uri.UnescapeDataString(uri.Path);
+                            if (File.Exists(fullname + ".old")) // Clear old file in case it wasnt;
+                                File.Delete(fullname + ".old");
+
+                            File.Move(fullname, fullname + ".old"); // rename current executable to old
+
+                            using (var responseStream = await response.Content.ReadAsStreamAsync())
+                            {
+                                using var fileStream = File.Create(fullname);
+                                // probably want to have proper name here
+                                responseStream.CopyTo(fileStream);
+                            }
+                        }
+                        else
+                        {
+                            System.Console.WriteLine("Server returned no data: " + response.StatusCode.ToString());
+                            return false;
+                        }
                     }
                 }
                 else
@@ -126,11 +201,12 @@ namespace SuperNewRoles
                         if (browser_download_url != null && current["content_type"] != null)
                         {
                             if (current["content_type"].ToString().Equals("application/x-msdownload") &&
-                                browser_download_url.EndsWith(".dll"))
+                                browser_download_url.EndsWith("SuperNewRoles.dll"))
                             {
                                 updateURL = browser_download_url;
                                 await Update();
-                                setdate.SetText(ModTranslation.getString("creditsMain") + "\n" + string.Format(ModTranslation.getString("creditsUpdateOk"), SuperNewRolesPlugin.NewVersion));
+                                setdate.SetText(ModTranslation.GetString("creditsMain") + "\n" + string.Format(ModTranslation.GetString("creditsUpdateOk"), SuperNewRolesPlugin.NewVersion));
+                                ConfigRoles.IsUpdate.Value = true;
                             }
                         }
                     }
