@@ -820,6 +820,12 @@ namespace SuperNewRoles.Modules
         public static CustomRoleOption ConnectKillerOption;
         public static CustomOption ConnectKillerPlayerCount;
 
+        public static CustomRoleOption WaveCannonOption;
+        public static CustomOption WaveCannonPlayerCount;
+        public static CustomOption WaveCannonCoolTime;
+        public static CustomOption WaveCannonChargeTime;
+        public static CustomOption WaveCannonIsSyncKillCoolTime;
+
         public static CustomRoleOption DoppelgangerOption;
         public static CustomOption DoppelgangerPlayerCount;
         public static CustomOption DoppelgangerDurationTime;
@@ -838,6 +844,16 @@ namespace SuperNewRoles.Modules
         public static CustomOption PavlovsdogRunAwayKillCoolTime;
         public static CustomOption PavlovsdogRunAwayDeathTime;
         public static CustomOption PavlovsdogRunAwayDeathTimeIsMeetingReset;
+
+        public static CustomRoleOption WaveCannonJackalOption;
+        public static CustomOption WaveCannonJackalPlayerCount;
+        public static CustomOption WaveCannonJackalCoolTime;
+        public static CustomOption WaveCannonJackalChargeTime;
+        public static CustomOption WaveCannonJackalKillCoolDown;
+        public static CustomOption WaveCannonJackalUseVent;
+        public static CustomOption WaveCannonJackalUseSabo;
+        public static CustomOption WaveCannonJackalIsImpostorLight;
+        public static CustomOption WaveCannonJackalIsSyncKillCoolTime;
         //CustomOption
 
         public static CustomOption QuarreledOption;
@@ -1682,6 +1698,22 @@ namespace SuperNewRoles.Modules
             PavlovsdogRunAwayKillCoolTime = CustomOption.Create(1000, false, CustomOptionType.Neutral, "PavlovsdogRunAwayKillCoolTime", 20f, 2.5f, 60f, 2.5f, PavlovsownerOption);
             PavlovsdogRunAwayDeathTime = CustomOption.Create(1001, false, CustomOptionType.Neutral, "PavlovsdogRunAwayDeathTime", 60f, 2.5f, 180f, 2.5f, PavlovsownerOption);
             PavlovsdogRunAwayDeathTimeIsMeetingReset = CustomOption.Create(1002, false, CustomOptionType.Neutral, "PavlovsdogRunAwayDeathTimeIsMeetingReset", true, PavlovsownerOption);
+
+            WaveCannonOption = new(1019, false, CustomOptionType.Impostor, "WaveCannonName", RoleClass.WaveCannon.color, 1);
+            WaveCannonPlayerCount = Create(1018, false, CustomOptionType.Impostor, "SettingPlayerCountName", ImpostorPlayers[0], ImpostorPlayers[1], ImpostorPlayers[2], ImpostorPlayers[3], WaveCannonOption);
+            WaveCannonCoolTime = Create(1020, false, CustomOptionType.Impostor, "NiceScientistCoolDownSetting", 20f, 2.5f, 180f, 2.5f, WaveCannonOption);
+            WaveCannonChargeTime = Create(1021, false, CustomOptionType.Impostor, "WaveCannonChargeTime", 3f, 0.5f, 15f, 0.5f, WaveCannonOption);
+            WaveCannonIsSyncKillCoolTime = Create(1016, false, CustomOptionType.Impostor, "IsSyncKillCoolTime", false, WaveCannonOption);
+
+            WaveCannonJackalOption = new(1022, false, CustomOptionType.Neutral, "WaveCannonJackalName",RoleClass.WaveCannonJackal.color, 1);
+            WaveCannonJackalPlayerCount = Create(1023, false, CustomOptionType.Neutral, "SettingPlayerCountName", CrewPlayers[0], CrewPlayers[1], CrewPlayers[2], CrewPlayers[3], WaveCannonJackalOption);
+            WaveCannonJackalCoolTime = Create(1014, false, CustomOptionType.Neutral, "NiceScientistCoolDownSetting", 20f, 2.5f, 180f, 2.5f, WaveCannonJackalOption);
+            WaveCannonJackalChargeTime = Create(1015, false, CustomOptionType.Neutral, "WaveCannonChargeTime", 3f, 0.5f, 15f, 0.5f, WaveCannonJackalOption);
+            WaveCannonJackalKillCoolDown = Create(1024, false, CustomOptionType.Neutral, "JackalCoolDownSetting", 30f, 2.5f, 60f, 2.5f, WaveCannonJackalOption, format: "unitSeconds");
+            WaveCannonJackalUseVent = Create(1025, false, CustomOptionType.Neutral, "JackalUseVentSetting", true, WaveCannonJackalOption);
+            WaveCannonJackalIsImpostorLight = Create(1026, false, CustomOptionType.Neutral, "MadMateImpostorLightSetting", false, WaveCannonJackalOption);
+            WaveCannonJackalUseSabo = Create(1013, false, CustomOptionType.Neutral, "JackalUseSaboSetting", false, WaveCannonJackalOption);
+            WaveCannonJackalIsSyncKillCoolTime = Create(1017, false, CustomOptionType.Neutral, "IsSyncKillCoolTime", false, WaveCannonJackalOption);
 
             Roles.Impostor.Conjurer.SetupCustomOptions();
 

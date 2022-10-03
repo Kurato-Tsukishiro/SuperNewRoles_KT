@@ -209,6 +209,9 @@ namespace SuperNewRoles.Patch
                             case RoleId.Pavlovsowner:
                                 Roles.Neutral.Pavlovsdogs.OwnerFixedUpdate();
                                 break;
+                            case RoleId.WaveCannonJackal:
+                                JackalSeer.JackalSeerFixedPatch.JackalSeerPlayerOutLineTarget();
+                                break;
                             case RoleId.ConnectKiller:
                                 Roles.Impostor.ConnectKiller.Update();
                                 break;
@@ -240,6 +243,13 @@ namespace SuperNewRoles.Patch
                                         sideplayer.RPCSetRoleUnchecked(RoleTypes.Impostor);
                                         RoleClass.SideKiller.IsUpMadKiller = true;
                                     }
+                                }
+                                break;
+                            case RoleId.Vulture:
+                                if (RoleClass.Vulture.Arrow?.arrow != null)
+                                {
+                                    Object.Destroy(RoleClass.Vulture.Arrow.arrow);
+                                    return;
                                 }
                                 break;
                         }
