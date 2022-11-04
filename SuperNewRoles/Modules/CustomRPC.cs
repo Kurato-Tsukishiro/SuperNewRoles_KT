@@ -822,7 +822,7 @@ namespace SuperNewRoles.Modules
                 }
             }
         }
-        public static void MeetingSheriffKill(byte SheriffId, byte TargetId, bool MissFire)
+        public static void MeetingSheriffKill(byte SheriffId, byte TargetId, bool MissFire, bool AlwaysKill)
         {
             PlayerControl sheriff = ModHelpers.PlayerById(SheriffId);
             PlayerControl target = ModHelpers.PlayerById(TargetId);
@@ -830,7 +830,11 @@ namespace SuperNewRoles.Modules
             if (sheriff == null || target == null) return;
             if (!PlayerControl.LocalPlayer.IsAlive())
             {
-                FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, sheriff.name + "は" + target.name + "をシェリフキルした！");
+                FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, $"{sheriff.name} は {target.name} をシェリフキルした！");
+                if (AlwaysKill)
+                {
+                    FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, $"{target.name} をキルしたが誤射だった! {sheriff.name} は自責の念で自害した!");
+                }
                 if (MissFire)
                 {
                     FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, sheriff.name + "は誤爆した！");
@@ -840,7 +844,20 @@ namespace SuperNewRoles.Modules
                     FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, sheriff.name + "は成功した！");
                 }
             }
-            if (MissFire)
+            if (AlwaysKill)
+            {
+                sheriff.Exiled();
+                if (PlayerControl.LocalPlayer == sheriff)
+                {
+                    FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(sheriff.Data, sheriff.Data);
+                }
+                target.Exiled();
+                if (PlayerControl.LocalPlayer == target)
+                {
+                    FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(sheriff.Data, target.Data);
+                }
+            }
+            else if (MissFire)
             {
                 sheriff.Exiled();
                 if (PlayerControl.LocalPlayer == sheriff)
@@ -853,7 +870,7 @@ namespace SuperNewRoles.Modules
                 target.Exiled();
                 if (PlayerControl.LocalPlayer == target)
                 {
-                    FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(target.Data, sheriff.Data);
+                    FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(sheriff.Data, target.Data);
                 }
             }
             if (MeetingHud.Instance)
@@ -1259,7 +1276,7 @@ namespace SuperNewRoles.Modules
                             SheriffKill(reader.ReadByte(), reader.ReadByte(), reader.ReadBoolean(), reader.ReadBoolean());
                             break;
                         case CustomRPC.MeetingSheriffKill:
-                            MeetingSheriffKill(reader.ReadByte(), reader.ReadByte(), reader.ReadBoolean());
+                            MeetingSheriffKill(reader.ReadByte(), reader.ReadByte(), reader.ReadBoolean(), reader.ReadBoolean());
                             break;
                         case CustomRPC.CustomRPCKill:
                             CustomRPCKill(reader.ReadByte(), reader.ReadByte());
