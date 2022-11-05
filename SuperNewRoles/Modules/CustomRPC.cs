@@ -788,13 +788,13 @@ namespace SuperNewRoles.Modules
         public static void SetLovers(byte playerid1, byte playerid2)
             => RoleHelpers.SetLovers(ModHelpers.PlayerById(playerid1), ModHelpers.PlayerById(playerid2));
 
-        public static void SheriffKill(byte SheriffId, byte TargetId, bool MissFire, bool AlwaysKill)
+        public static void SheriffKill(byte SheriffId, byte TargetId, bool MissFire, bool alwaysKill)
         {
             PlayerControl sheriff = ModHelpers.PlayerById(SheriffId);
             PlayerControl target = ModHelpers.PlayerById(TargetId);
             if (sheriff == null || target == null) return;
 
-            if (AlwaysKill)
+            if (alwaysKill)
             {
                 sheriff.MurderPlayer(target);
                 sheriff.MurderPlayer(sheriff);
@@ -822,7 +822,7 @@ namespace SuperNewRoles.Modules
                 }
             }
         }
-        public static void MeetingSheriffKill(byte SheriffId, byte TargetId, bool MissFire, bool AlwaysKill)
+        public static void MeetingSheriffKill(byte SheriffId, byte TargetId, bool MissFire, bool alwaysKill)
         {
             PlayerControl sheriff = ModHelpers.PlayerById(SheriffId);
             PlayerControl target = ModHelpers.PlayerById(TargetId);
@@ -831,7 +831,7 @@ namespace SuperNewRoles.Modules
             if (!PlayerControl.LocalPlayer.IsAlive())
             {
                 FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, string.Format(ModTranslation.GetString("MeetingSheriffkillChat1"), target.name, sheriff.name));
-                if (AlwaysKill)
+                if (alwaysKill)
                 {
                     FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, string.Format(ModTranslation.GetString("MeetingSheriffkillChat2"), target.name, sheriff.name));
                 }
@@ -844,7 +844,7 @@ namespace SuperNewRoles.Modules
                     FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(sheriff, string.Format(ModTranslation.GetString("MeetingSheriffkillChat4"), sheriff.name));
                 }
             }
-            if (AlwaysKill)
+            if (alwaysKill)
             {
                 target.Exiled();
                 if (PlayerControl.LocalPlayer == target)
@@ -882,7 +882,7 @@ namespace SuperNewRoles.Modules
                         pva.SetDead(pva.DidReport, true);
                         pva.Overlay.gameObject.SetActive(true);
                     }
-                    else if (pva.TargetPlayerId == TargetId && AlwaysKill)
+                    else if (pva.TargetPlayerId == TargetId && alwaysKill)
                     {
                         pva.SetDead(pva.DidReport, true);
                         pva.Overlay.gameObject.SetActive(true);
