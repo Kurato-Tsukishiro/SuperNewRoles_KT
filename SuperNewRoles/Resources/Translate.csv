@@ -255,6 +255,8 @@ HASSeekName,Seek,鬼,抓捕者
 HASDeathTaskSetting,Hide Death Clear Task,死亡するとタスクが終わる,死亡后隐藏尸体并清除任务
 HASUseSaboSetting,Use Sabotage,サボタージュが使える,抓捕者可以造成紧急破坏
 HASUseVentSetting,Use Vent,ベントが使える,抓捕者可以使用管道
+TaskPracticeModeName,Task practice Mode,タスク練習モード
+SettingTaskPracticeMode,Setting the Task practice mode,タスク練習モードの設定
 
 # FinalResults
 FinalResults,Final results,最終結果

@@ -85,7 +85,19 @@ namespace SuperNewRoles.Mode
                 SuperHostRoles.BlockTool.IsCom = false;
             }
         }
-        public static string[] modes = new string[] { ModTranslation.GetString("HideAndSeekModeName"), ModTranslation.GetString("SuperHostRolesModeName"), ModTranslation.GetString("BattleRoyalModeName"), ModTranslation.GetString("ZombieModeName"), ModTranslation.GetString("RandomColorModeName"), ModTranslation.GetString("NotImpostorCheckModeName"), ModTranslation.GetString("DetectiveModeName"), ModTranslation.GetString("CopsRobbersModeName"), ModTranslation.GetString("WerewolfModeName") };
+        public static string[] modes = new string[]
+        {
+            ModTranslation.GetString("HideAndSeekModeName"),
+            ModTranslation.GetString("SuperHostRolesModeName"),
+            ModTranslation.GetString("BattleRoyalModeName"),
+            ModTranslation.GetString("ZombieModeName"),
+            ModTranslation.GetString("RandomColorModeName"),
+            ModTranslation.GetString("NotImpostorCheckModeName"),
+            ModTranslation.GetString("DetectiveModeName"),
+            ModTranslation.GetString("CopsRobbersModeName"),
+            ModTranslation.GetString("WerewolfModeName"),
+            ModTranslation.GetString("TaskPracticeModeName")
+        };
 
         public const string PlayingOnSuperNewRoles = $"Playing on {SuperNewRolesPlugin.ColorModName}";
 
