@@ -129,6 +129,7 @@ namespace SuperNewRoles.Mode
             RandomColor.RandomColorOptions.Load();
             Detective.DetectiveOptions.Load();
             CopsRobbers.CopsRobbersOptions.Load();
+            TaskPractice.TaskPracticeOption.Load();
             //Werewolf.WerewolfOptions.Load();
 
             PlusMode.Options.Load();
