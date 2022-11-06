@@ -25,6 +25,7 @@ public enum ModeId
     Detective,
     Werewolf,
     CopsRobbers,
+    TaskPractice,
     VanillaHns
 }
 public static class ModeHandler
@@ -78,6 +79,11 @@ public static class ModeHandler
             thisMode = ModeId.CopsRobbers;
             CopsRobbers.Main.ClearAndReloads();
         }
+        else if (IsMode(ModeId.TaskPractice, false))
+        {
+            thisMode = ModeId.TaskPractice;
+            TaskPractice.Main.ClearAndReloads();
+        }
         else
         {
             thisMode = ModeId.Default;
@@ -87,7 +93,19 @@ public static class ModeHandler
             SuperHostRoles.BlockTool.IsCom = false;
         }
     }
-    public static string[] modes = new string[] { ModTranslation.GetString("HideAndSeekModeName"), ModTranslation.GetString("SuperHostRolesModeName"), ModTranslation.GetString("BattleRoyalModeName"), ModTranslation.GetString("ZombieModeName"), ModTranslation.GetString("RandomColorModeName"), ModTranslation.GetString("NotImpostorCheckModeName"), ModTranslation.GetString("DetectiveModeName"), ModTranslation.GetString("CopsRobbersModeName"), ModTranslation.GetString("WerewolfModeName") };
+    public static string[] modes = new string[]
+    {
+        ModTranslation.GetString("HideAndSeekModeName"),
+        ModTranslation.GetString("SuperHostRolesModeName"),
+        ModTranslation.GetString("BattleRoyalModeName"),
+        ModTranslation.GetString("ZombieModeName"),
+        ModTranslation.GetString("RandomColorModeName"),
+        ModTranslation.GetString("NotImpostorCheckModeName"),
+        ModTranslation.GetString("DetectiveModeName"),
+        ModTranslation.GetString("CopsRobbersModeName"),
+        ModTranslation.GetString("WerewolfModeName"),
+        ModTranslation.GetString("TaskPracticeName")
+    };
 
     public const string PlayingOnSuperNewRoles = $"Playing on {SuperNewRolesPlugin.ColorModName}";
 
@@ -102,6 +120,7 @@ public static class ModeHandler
         else if (IsMode(ModeId.RandomColor)) return SuperHostRoles.Intro.ModeHandler(__instance);
         else if (IsMode(ModeId.NotImpostorCheck)) return SuperHostRoles.Intro.ModeHandler(__instance);
         else if (IsMode(ModeId.Detective)) return SuperHostRoles.Intro.ModeHandler(__instance);
+        else if (IsMode(ModeId.TaskPractice)) return SuperHostRoles.Intro.ModeHandler(__instance);
         else if (IsMode(ModeId.CopsRobbers))
         {
             var Data = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
@@ -131,6 +150,7 @@ public static class ModeHandler
         RandomColor.RandomColorOptions.Load();
         Detective.DetectiveOptions.Load();
         CopsRobbers.CopsRobbersOptions.Load();
+        TaskPractice.TaskPracticeOption.Load();
         //Werewolf.WerewolfOptions.Load();
 
         PlusMode.Options.Load();
@@ -177,6 +197,8 @@ public static class ModeHandler
             ? ModeId.Detective
             : IsMode(ModeId.CopsRobbers, false)
             ? ModeId.CopsRobbers
+            : IsMode(ModeId.TaskPractice, false)
+            ? ModeId.TaskPractice
             : IsMode(ModeId.Werewolf, false)
             ? ModeId.Werewolf
             : ModeId.No;
@@ -235,6 +257,7 @@ public static class ModeHandler
             ModeId.NotImpostorCheck => ModeSetting.GetBool() && ThisModeSetting.GetString() == modes[5],
             ModeId.Detective => ModeSetting.GetBool() && ThisModeSetting.GetString() == modes[6],
             ModeId.CopsRobbers => ModeSetting.GetBool() && ThisModeSetting.GetString() == modes[7],
+            ModeId.TaskPractice => ModeSetting.GetBool() && ThisModeSetting.GetString() == modes[8],
             _ => false,
         };
     }
@@ -248,6 +271,7 @@ public static class ModeHandler
         else if (IsMode(ModeId.Detective)) return Detective.WinCheckPatch.CheckEndGame(__instance);
         else if (IsMode(ModeId.CopsRobbers)) return CopsRobbers.Main.EndGameCheck(__instance);
         else if (IsMode(ModeId.CopsRobbers)) return CopsRobbers.CheckEndGame.EndGameCheck(__instance);
+        else if (IsMode(ModeId.TaskPractice)) return TaskPractice.Main.EndGameCheck(__instance);
         return false;
     }
     public static bool EndGameCheckHnSs(ShipStatus __instance, PlayerStatistics statistics)
