@@ -6,7 +6,7 @@ namespace SuperNewRoles.Mode.TaskPractice
         public static CustomOption TaskPracticeMode;
         public static void Load()
         {
-            TaskPracticeMode = CustomOption.Create(OptionId, true, CustomOptionType.Generic, "SettingTaskPracticeMode", false, ModeHandler.ModeSetting);
+            TaskPracticeMode = CustomOption.Create(optionId, true, CustomOptionType.Generic, "SettingTaskPracticeMode", false, ModeHandler.ModeSetting);
         }
     }
 }
