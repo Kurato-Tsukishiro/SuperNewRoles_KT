@@ -259,22 +259,22 @@ TaskPracticeModeName,Work person Mode,仕事人モード
 SettingTaskPracticeMode,Setting the Work person mode,仕事人モードの設定
 TPIsEmergencyCall,Is the emergency call-up automatic?,緊急招集が自動で行われるか
 TPIsEmergencyCallIndividualSetting,Is the emergency call-up automatic?,[個別設定] 自動緊急招集が起きる時間
-TPSetTimingForEmergencyCall,Median time for an emergency call to be triggered.,緊急招集が発動する時間の中央値
-TPSetErrorMargunForEmergencyCall,Error in the time when the emergency call is triggered.,緊急招集が発動する時間の誤差(絶対値)
-TPIsLoseWhenFailFinishTask,Defeat if task not completed?,指定ターンまでにタスクが終わらなかった場合敗北するか
+TPSetTimingForEmergencyCall,Median time for an emergency call to be triggered.,緊急招集が発動する時間
+TPSetErrorMargunForEmergencyCall,Error in the time when the emergency call is triggered.,緊急招集が発動する時間の誤差
+TPIsLoseWhenFailFinishTask,Defeat if task not completed?,タスクが終わらなかった場合敗北するか
 TPSetLimitsOfTurn,The number of turns allowed before forced defeat occurs.,強制敗北するターン数
-TPIsSabotageTriggered,Automatically generate sabotage?,サボタージュを自動的に発動させるか
+TPIsSabotageTriggered,Automatically generate sabotage?,サボタージュを発動させるか
 TPIsSabotageIndividualSetting,Set up sabotage individually.,[個別設定] サボタージュ
 TPIsAutoRipea,Automatically fix sabotage?,サボタージュを自動で直すか
-TPSetTimingForAutoRipea,Median time to fix sabotage.,サボタージュが直る時間の中央値
-TPSetErrorMargunForAutoRipea,Error in the time it takes for sabotage to be fixed.,サボタージュが直る時間の誤差(絶対値)
-TPSetTimingForSabotage,The interval at which sabotage is triggered.,サボタージュが発動する間隔の中央値
-TPSetErrorMargunForSabotage,Error in the interval at which sabotage is triggered,サボタージュが発動する間隔の誤差(絶対値)
-TPSetDoorClosingTime,Time from start of turn to door closing.,ターン開始からドアが閉まるまでの時間
+TPSetTimingForAutoRipea,Median time to fix sabotage.,サボタージュが直る時間
+TPSetErrorMargunForSabotage,Error in the interval at which sabotage is triggered,サボタージュが発動する間隔の誤差
+TPSetDoorClosingTime,Time from start of turn to door closing.,ドアが閉まるまでの時間
 TPSetDoorClosingInterval,Door closing interval,ドア閉めの間隔
 TPSetTurnsThatelEctricalSabotage,Maximum number of turns that a power outge can enter.,停電が入るターン数の上限
-TPSetEctricalSabotageTriggeredTime,Time from start of turn until power failure occurs.,ターン開始から停電が入る秒数
-TPSetOtherSabotageTriggeredTime,Time until sabotage other than power outage.,ターン開始から停電以外のサボが入るまでの秒数
+TPSetEctricalSabotageTriggeredTime,Time from start of turn until power failure occurs.,停電が入るまでの時間
+TPSetOtherSabotageTriggeredTime,Time until sabotage other than power outage.,停電以外のサボが入るまでの時間
+TPSetErrorMargunForAutoRipea,Error in the time it takes for sabotage to be fixed.,サボタージュが直る時間の誤差
+TPSetTimingForSabotage,The interval at which sabotage is triggered.,サボタージュが発動する間隔
 
 # FinalResults
 FinalResults,Final results,最終結果

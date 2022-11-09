@@ -15,13 +15,13 @@ namespace SuperNewRoles.Mode.TaskPractice
         public static CustomOption IsAutoRipea; //サボタージュを自動で直すか
         public static CustomOption SetTimingForAutoRipea; //サボが自動で直る時間 [中央値]
         public static CustomOption SetErrorMargunForAutoRipea; //サボが自動で直る時間の誤差 [絶対値]
-        public static CustomOption SetTimingForSabotage; //サボが発動する間隔 [中央値]
-        public static CustomOption SetErrorMargunForSabotage; //サボが発動する間隔の誤差 [絶対値]
         public static CustomOption SetDoorClosingTime; //ターン開始からドアが閉まるまでの秒数
         public static CustomOption SetDoorClosingInterval; //ドアが閉まる間隔
         public static CustomOption SetTurnsThatelEctricalSabotage; //序盤:停電が入るターン数 (此処の設定ターン数までを「序盤」とする)
         public static CustomOption SetEctricalSabotageTriggeredTime; //序盤:ターン開始から停電が入るまでの秒数
         public static CustomOption SetOtherSabotageTriggeredTime; //中盤:ターン開始からサボ(コミュサボ or リアクター)が入るまでの秒数
+        public static CustomOption SetTimingForSabotage; //サボが発動する間隔 [中央値]
+        public static CustomOption SetErrorMargunForSabotage; //サボが発動する間隔の誤差 [絶対値]
 
         public static void Load()
         {
@@ -37,13 +37,13 @@ namespace SuperNewRoles.Mode.TaskPractice
             IsAutoRipea = CustomOption.Create(optionId + 9, false, CustomOptionType.Generic, "TPIsAutoRipea", true, IsSabotageIndividualSetting);
             SetTimingForAutoRipea = CustomOption.Create(optionId + 10, false, CustomOptionType.Generic, "TPSetTimingForAutoRipea", 20f, 0f, 60f, 1f, IsAutoRipea);
             SetErrorMargunForAutoRipea = CustomOption.Create(optionId + 11, false, CustomOptionType.Generic, "TPSetErrorMargunForAutoRipea", 10f, 0f, 20f, 1f, IsAutoRipea);
-            SetTimingForSabotage = CustomOption.Create(optionId + 12, false, CustomOptionType.Generic, "TPSetTimingForSabotage", 15f, 15f, 60f, 1f, IsSabotageIndividualSetting);
-            SetErrorMargunForSabotage = CustomOption.Create(optionId + 13, false, CustomOptionType.Generic, "TPSetErrorMargunForSabotage", 10f, 0f, 30f, 1f, IsSabotageIndividualSetting);
-            SetDoorClosingTime = CustomOption.Create(optionId + 14, false, CustomOptionType.Generic, "TPSetDoorClosingTime", 3f, 0f, 10f, 1f, IsSabotageIndividualSetting);
-            SetDoorClosingInterval = CustomOption.Create(optionId + 15, false, CustomOptionType.Generic, "TPSetDoorClosingInterval", 30f, 0f, 120f, 5f, IsSabotageIndividualSetting);
-            SetTurnsThatelEctricalSabotage = CustomOption.Create(optionId + 16, false, CustomOptionType.Generic, "TPSetTurnsThatelEctricalSabotage", 3f, 0f, 10f, 1f, IsSabotageIndividualSetting);
-            SetEctricalSabotageTriggeredTime = CustomOption.Create(optionId + 17, false, CustomOptionType.Generic, "TPSetEctricalSabotageTriggeredTime", 25f, 0f, 60f, 1f, IsSabotageIndividualSetting);
-            SetOtherSabotageTriggeredTime = CustomOption.Create(optionId + 18, false, CustomOptionType.Generic, "TPSetOtherSabotageTriggeredTime", 15f, 0f, 60f, 1f, IsSabotageIndividualSetting);
+            SetDoorClosingTime = CustomOption.Create(optionId + 12, false, CustomOptionType.Generic, "TPSetDoorClosingTime", 3f, 0f, 10f, 1f, IsSabotageIndividualSetting);
+            SetDoorClosingInterval = CustomOption.Create(optionId + 13, false, CustomOptionType.Generic, "TPSetDoorClosingInterval", 30f, 0f, 120f, 5f, IsSabotageIndividualSetting);
+            SetTurnsThatelEctricalSabotage = CustomOption.Create(optionId + 14, false, CustomOptionType.Generic, "TPSetTurnsThatelEctricalSabotage", 3f, 0f, 10f, 1f, IsSabotageIndividualSetting);
+            SetEctricalSabotageTriggeredTime = CustomOption.Create(optionId + 15, false, CustomOptionType.Generic, "TPSetEctricalSabotageTriggeredTime", 25f, 0f, 60f, 1f, IsSabotageIndividualSetting);
+            SetOtherSabotageTriggeredTime = CustomOption.Create(optionId + 16, false, CustomOptionType.Generic, "TPSetOtherSabotageTriggeredTime", 15f, 0f, 60f, 1f, IsSabotageIndividualSetting);
+            SetTimingForSabotage = CustomOption.Create(optionId + 17, false, CustomOptionType.Generic, "TPSetTimingForSabotage", 15f, 15f, 60f, 1f, IsSabotageIndividualSetting);
+            SetErrorMargunForSabotage = CustomOption.Create(optionId + 18, false, CustomOptionType.Generic, "TPSetErrorMargunForSabotage", 10f, 0f, 30f, 1f, IsSabotageIndividualSetting);
         }
     }
 }
