@@ -2,7 +2,7 @@ namespace SuperNewRoles.Mode.TaskPractice
 {
     class TaskPracticeOption
     {
-        private const int optionId = 1099;// 設定のId
+        private const int optionId = 1200;// 設定のId
         public static CustomOption TaskPracticeMode; //仕事人モード
         public static CustomOption IsEmergencyCall; //緊急招集が自動で行われるか
         public static CustomOption IsEmergencyCallIndividualSetting; //「[個別設定] 自動緊急招集が起きる時間」を有効にするか
