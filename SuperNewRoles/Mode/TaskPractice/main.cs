@@ -7,17 +7,15 @@ using SuperNewRoles.Mode.SuperHostRoles;
 using SuperNewRoles.Roles;
 using UnityEngine;
 
-namespace SuperNewRoles.Mode.TaskPractice
+namespace SuperNewRoles.Mode.TaskPractice;
+class Main
 {
-    class Main
+    public static void ClearAndReloads()
     {
-        public static void ClearAndReloads()
-        {
-        }
+    }
 
-        public static bool EndGameCheck(ShipStatus __instance)
-        {
-            return false;
-        }
+    public static bool EndGameCheck(ShipStatus __instance)
+    {
+        return false;
     }
 }
