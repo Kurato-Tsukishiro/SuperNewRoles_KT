@@ -17,6 +17,7 @@ namespace SuperNewRoles.Mode.TaskPractice
 
         public static bool EndGameCheck(ShipStatus __instance)
         {
+            return false;
         }
     }
 }

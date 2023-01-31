@@ -2,10 +2,11 @@ namespace SuperNewRoles.Mode.TaskPractice
 {
     class TaskPracticeOption
     {
+        private const int OptionId = 1099;// 設定のId
         public static CustomOption TaskPracticeMode;
         public static void Load()
         {
-            TaskPracticeMode = CustomOption.Create(1099, true, CustomOptionType.Generic, "SettingBattleRoyalMode", false, ModeHandler.ModeSetting);
+            TaskPracticeMode = CustomOption.Create(OptionId, true, CustomOptionType.Generic, "SettingBattleRoyalMode", false, ModeHandler.ModeSetting);
         }
     }
 }
