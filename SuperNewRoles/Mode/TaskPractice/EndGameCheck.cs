@@ -8,6 +8,10 @@ using SuperNewRoles.Roles;
 using UnityEngine;
 
 namespace SuperNewRoles.Mode.TaskPractice;
-class Main
+class EndGameCheck
 {
+    public static bool CheckEndGame(ShipStatus __instance)
+    {
+        return false;
+    }
 }

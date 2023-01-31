@@ -44,4 +44,8 @@ class TaskPracticeOption
         SetTimingForSabotage = CustomOption.Create(optionId + 17, false, CustomOptionType.Generic, "TPSetTimingForSabotage", 15f, 15f, 60f, 1f, IsSabotageIndividualSetting);
         SetErrorMargunForSabotage = CustomOption.Create(optionId + 18, false, CustomOptionType.Generic, "TPSetErrorMargunForSabotage", 10f, 0f, 30f, 1f, IsSabotageIndividualSetting);
     }
+
+    public static void ClearAndReloads()
+    {
+    }
 }

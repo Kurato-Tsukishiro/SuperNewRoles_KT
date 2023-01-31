@@ -82,7 +82,7 @@ public static class ModeHandler
         else if (IsMode(ModeId.TaskPractice, false))
         {
             thisMode = ModeId.TaskPractice;
-            TaskPractice.Main.ClearAndReloads();
+            TaskPractice.TaskPracticeOption.ClearAndReloads();
         }
         else
         {
@@ -271,7 +271,7 @@ public static class ModeHandler
         else if (IsMode(ModeId.Detective)) return Detective.WinCheckPatch.CheckEndGame(__instance);
         else if (IsMode(ModeId.CopsRobbers)) return CopsRobbers.Main.EndGameCheck(__instance);
         else if (IsMode(ModeId.CopsRobbers)) return CopsRobbers.CheckEndGame.EndGameCheck(__instance);
-        else if (IsMode(ModeId.TaskPractice)) return TaskPractice.Main.EndGameCheck(__instance);
+        else if (IsMode(ModeId.TaskPractice)) return TaskPractice.EndGameCheck.CheckEndGame(__instance);
         return false;
     }
     public static bool EndGameCheckHnSs(ShipStatus __instance, PlayerStatistics statistics)
