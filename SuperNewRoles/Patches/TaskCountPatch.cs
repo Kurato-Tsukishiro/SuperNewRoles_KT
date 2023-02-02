@@ -100,6 +100,7 @@ class TaskCount
                 case ModeId.SuperHostRoles:
                 case ModeId.Default:
                 case ModeId.CopsRobbers:
+                case ModeId.TaskPractice:
                     CountDefaultTask(__instance);
                     return;
                 case ModeId.Zombie:
